@@ -1,0 +1,8 @@
+Patcher les vues nécessaires dans la base SIGMA et importer les données paramètres (ok)
+Tester certains endpoints (en cours)
+Sur la liste des utilisateurs, le bouton d'action ajouter un profile ne fonctionne pas correctement. La modal d'ajout de profil à un utilisateur ne change pas en fonction de l'utilisateur selectionné. elle reste la même quelque soit la ligne. Les informations relatives à l'utisateur ne varie pas
+S'assurer de la bonne coordination avec le front
+Intégration de modules métier (Associations, sections, Projets, Comptabilité) ... en perspective
+
+
+
