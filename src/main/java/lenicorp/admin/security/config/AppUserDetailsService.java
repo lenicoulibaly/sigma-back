@@ -2,6 +2,7 @@ package lenicorp.admin.security.config;
 
 import lenicorp.admin.security.controller.repositories.AuthAssoRepo;
 import lenicorp.admin.security.controller.repositories.UserRepo;
+import lenicorp.admin.security.model.dtos.UserDTO;
 import lenicorp.admin.security.model.entities.AppUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,8 +23,11 @@ public class AppUserDetailsService implements UserDetailsService
     private final AuthAssoRepo authAssoRepo;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        AppUser user = userRepo.findByUsername(username);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
+    {
+        System.out.println("Loading user by username: " + username);
+
+        UserDTO user = userRepo.findMinimalByUsername(username);
 
         if (user == null) {
             throw new UsernameNotFoundException("User not found with username: " + username);

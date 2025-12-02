@@ -30,7 +30,7 @@ public @interface ValidDocType
         public boolean isValid(String value, ConstraintValidatorContext context)
         {
             if(value == null) return true;
-            return typeRepo.existsByCodeAndGroupCode(value, "DOCUMENT");
+            return typeRepo.existsByCodeAndGroupCode(value, "DOC");
         }
     }
 }

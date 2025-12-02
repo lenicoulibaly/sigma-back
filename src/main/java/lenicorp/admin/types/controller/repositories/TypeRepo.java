@@ -83,7 +83,7 @@ public interface TypeRepo extends JpaRepository<Type, String> {
 
     @Query("""
         select new lenicorp.admin.types.model.dtos.TypeDTO(t.code, t.name, t.ordre, t.typeGroup.groupCode, t.description) 
-        from TypeMapping tm join tm.child t where t.code = ?1
+        from TypeMapping tm join tm.child t where tm.parent.code = ?1
         """)
     List<TypeDTO> findDirectSousTypes(String parentCode);
 

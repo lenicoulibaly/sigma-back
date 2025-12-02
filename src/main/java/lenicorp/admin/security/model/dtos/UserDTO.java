@@ -1,7 +1,10 @@
 package lenicorp.admin.security.model.dtos;
 
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lenicorp.admin.security.model.validators.*;
 import lenicorp.admin.structures.model.validators.ExistingStrId;
+import lenicorp.admin.types.model.entities.Type;
 import lenicorp.admin.types.model.validators.ExistingGradeCode;
 import lenicorp.admin.utilities.validatorgroups.*;
 import jakarta.persistence.Column;
@@ -10,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.envers.NotAudited;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -70,6 +74,13 @@ public class UserDTO
     private String strSigle;
     private String chaineSigles;
 
+    private String adresse;
+    private String lieuNaissance;
+    private LocalDate dateNaissance;
+    private String emploiCode;
+    private String emploiName;
+    private LocalDate datePremierePriseService;
+
     public UserDTO(Long userId, String email, String firstName, String lastName, String tel, LocalDate changePasswordDate, boolean activated, boolean notBlocked, LocalDateTime lastLogin, Long strId, String strName, String strSigle, String chaineSigles)
     {
         this.userId = userId;
@@ -85,5 +96,14 @@ public class UserDTO
         this.strName = strName;
         this.strSigle = strSigle;
         this.chaineSigles = chaineSigles;
+    }
+
+    public UserDTO(Long userId, String email, String password, boolean activated, boolean notBlocked)
+    {
+        this.userId = userId;
+        this.email = email;
+        this.password = password;
+        this.activated = activated;
+        this.notBlocked = notBlocked;
     }
 }

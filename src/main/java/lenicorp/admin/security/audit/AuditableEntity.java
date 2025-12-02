@@ -1,6 +1,7 @@
 package lenicorp.admin.security.audit;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -21,14 +23,13 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Audited
+@EntityListeners({AuditingEntityListener.class, CustomAuditableEntityListener.class})
 public abstract class AuditableEntity implements Serializable
 {
-    protected String actionName;
-    protected String actionId;
     protected String connexionId;
-    @Column(name = "created_at") @CreatedDate
+    @Column(name = "created_at", updatable = false) @CreatedDate
     protected LocalDateTime createdAt;
-    @Column(name = "created_by", length = 50) @CreatedBy
+    @Column(name = "created_by", length = 50, updatable = false) @CreatedBy
     protected String createdBy;
     @Column(name = "updated_at") @LastModifiedDate
     protected LocalDateTime updatedAt;

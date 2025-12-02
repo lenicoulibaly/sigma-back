@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -132,40 +133,18 @@ public class StrService implements IStrService
     }
 
     @Override
-    public Page<ReadStrDTO> search(String key, Long parentId, String typeCode, PageRequest pageRequest)
+    public List<ReadStrDTO> searchStrList(String key, Long parentId, String typeCode)
     {
-        String safeKey = "%" + StringUtils.stripAccentsToUpperCase(key) + "%";
-        int page = pageRequest.getPageNumber();
-        int size = pageRequest.getPageSize();
-        String parentChaineSigles = parentId == null ? null : vsRepo.getChaineSigles(parentId);
-        typeCode = typeCode == null ? null : typeCode.equals("") ? null : typeCode;
-        String baseQuery = """
-                from VStructure vs 
-                where 
-                    vs.strTypeCode = coalesce(:typeCode, vs.strTypeCode) 
-                    and (vs.strName like :key or vs.strSigle like :key)
-                """;
-        if (parentChaineSigles != null) baseQuery += " and vs.chaineSigles like :parentChaineSigles";
+        key =StringUtils.stripAccentsToUpperCase(key);
+        List<ReadStrDTO> structures = vsRepo.searchStrList(key, parentId, typeCode);
+        return structures;
+    }
 
-        String countQuery = "select count(vs.strId) " + baseQuery;
-        String selectQuery = "select vs " + baseQuery + " order by vs.chaineSigles";
-
-        var countQueryExecutor = entityManager.createQuery(countQuery, Long.class)
-                .setParameter("key", safeKey)
-                .setParameter("typeCode", typeCode);
-        if (parentChaineSigles != null) countQueryExecutor.setParameter("parentChaineSigles", parentChaineSigles + "%");
-        Long totalElements = countQueryExecutor.getSingleResult();
-
-        var selectQueryExecutor = entityManager.createQuery(selectQuery, VStructure.class)
-                .setParameter("key", safeKey)
-                .setParameter("typeCode", typeCode);
-
-        if (parentChaineSigles != null)
-            selectQueryExecutor.setParameter("parentChaineSigles", parentChaineSigles + "%");
-        List<VStructure> content = selectQueryExecutor.setMaxResults(size).setFirstResult(page * size).getResultList();
-
-        List<ReadStrDTO> readStrDTOList = strMapper.mapToReadStrDTOList(content);
-
-        return new PageImpl<>(readStrDTOList, pageRequest, totalElements);
+    @Override
+    public Page<ReadStrDTO> search(String key, Long parentId, String typeCode, Pageable pageable)
+    {
+        key =StringUtils.stripAccentsToUpperCase(key);
+        Page<ReadStrDTO> structures = vsRepo.search(key, parentId, typeCode, pageable);
+        return structures;
     }
 }

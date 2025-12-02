@@ -30,6 +30,7 @@ public class EmailNotification extends AuditableEntity
     private boolean seen;
     private boolean sent;
     private String mailObject;
+    @Column(length = 10000)
     private String mailMessage;
 
     private String senderUsername;

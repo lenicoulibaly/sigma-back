@@ -43,6 +43,8 @@ public class SecurityConfig
                 //.requestMatchers("/api/auth/**").permitAll()
                 //.requestMatchers("/api/public/**").permitAll()
                     .requestMatchers("/*/open/**").permitAll()
+                    .requestMatchers("/types/by-group/*").permitAll()
+                    .requestMatchers("/types/direct-sous-types*").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             )

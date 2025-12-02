@@ -1,8 +1,9 @@
 package lenicorp.admin.archive.controller.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -37,13 +38,12 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.*;
 
-@RequiredArgsConstructor
-@org.springframework.stereotype.Service
-public abstract class AbstractDocumentService implements IDocumentService
+@RequiredArgsConstructor @Service
+public class DocumentService implements IDocumentService
 {
-	@Autowired protected TypeRepo typeRepo;
-	@Autowired protected DocMapper docMapper;
-	@Autowired protected DocumentRepository docRepo;
+	private final TypeRepo typeRepo;
+	private final DocMapper docMapper;
+	private final DocumentRepository docRepo;
 
 	@Override
 	public byte[] downloadFile(String filePAth)
@@ -94,7 +94,23 @@ public abstract class AbstractDocumentService implements IDocumentService
 		return file == null ? false : file.delete();
 	}
 
-	protected abstract Document mapToDocument(UploadDocReq dto);
+	@Override
+	public Page<ReadDocDTO> searchObjectDocs(Long objectI, String tableName, String key, Pageable pageable)
+	{
+		key = StringUtils.stripAccentsToUpperCase(key);
+        Page<ReadDocDTO> docs = docRepo.searchObjectDocs(objectI, tableName, key, pageable);
+        docs.forEach(doc->doc.setFile(downloadFile(doc.getDocPath())));
+		return docs;
+	}
+
+    @Override
+    public List<byte[]> getFileByObjectIdAndTableNameAndTypeCode(Long objectId, String tableName, String typeCode)
+    {
+        List<ReadDocDTO> logoDocs = docRepo.findByObjectIdAndTableNameAndTypeCode(objectId, tableName, typeCode);
+        if(logoDocs == null || logoDocs.isEmpty()) return Collections.emptyList();
+        List<byte[]> logos = logoDocs.stream().map(ReadDocDTO::getDocPath).map(this::downloadFile).toList();
+        return logos;
+    }
 
 	@Override
 	public void renameFile(String oldPath, String newPath)
@@ -137,14 +153,15 @@ public abstract class AbstractDocumentService implements IDocumentService
 	public Document uploadDocument(UploadDocReq dto) throws IOException
     {
 		if(dto.getDocTypeCode() == null ) throw new AppException("Le type de document ne peut être null");
-		InputStream file = dto.getFile().getInputStream();
+		MultipartFile file = dto.getFile();
+        InputStream fileInputStream = dto.getFile().getInputStream();
 		if(file == null) throw new AppException("Aucun fichier sélectionné");
 		Type docType = typeRepo.findById(dto.getDocTypeCode().toUpperCase(Locale.ROOT)).orElseThrow(()->new AppException("Type de document inconnu"));
 		if(docType == null || !"DOC".equals(docType.typeGroup.groupCode))  throw new AppException("Ce type de document n'est pris en charge par le système");
-		Document doc = mapToDocument(dto);
-		FileUtils.InputStreamDetails mimeTypeResult = FileUtils.getInputStreamDetails(file);
-		file = mimeTypeResult.getInputStream();
-		String mimeType = mimeTypeResult.getMimeType();
+		Document doc = docMapper.mapToDocument(dto);
+		//FileUtils.InputStreamDetails mimeTypeResult = FileUtils.getInputStreamDetails(fileInputStream);
+		//file = mimeTypeResult.getInputStream();
+		String mimeType = file.getContentType();
 		String extension = FileUtils.getExtensionFromMimeType(mimeType);
 		String path = generatePath(extension, dto.getDocTypeCode(), docType.name);
 		doc.setDocPath(path);
@@ -168,61 +185,43 @@ public abstract class AbstractDocumentService implements IDocumentService
 		if (doc == null) throw new AppException("Document inexistant");
 		docRepo.delete(doc);
 		//logService.logg(ArchiveActions.DELETE_DOCUMENT, doc, new Document(), ArchiveTable.DOCUMENT);
-		this.deleteFile(doc.getDocPath());
+		//this.deleteFile(doc.getDocPath());
 		return true;
 	}
 
 	@Transactional @Override
-	public Document updateDocument(UpdateDocReq dto) throws IOException {
+	public Document updateDocument(UpdateDocReq dto) throws IOException
+    {
 		Document doc = docRepo.findById(dto.getDocId()).orElseThrow(() -> new AppException("Document introuvable"));
 		if (doc == null) throw new AppException("Document inexistant");
 
-		//if(dto.getFile() == null) throw new AppException("Veuillez charger le fichier!");
-		InputStream file = dto.getFile().getInputStream();
-		if (file == null) {
-			// Handle the case where file is null
-			// For now, just throw an exception
-			throw new AppException("Veuillez charger le fichier!");
-		}
+        String oldDocPath = doc.getDocPath();
+        doc.setDocNum(Optional.ofNullable(dto.getDocNum()).orElse(doc.getDocNum()));
+        doc.setDocDescription(Optional.ofNullable(dto.getDocDescription()).orElse(doc.getDocDescription()));
+        doc.setDocName(Optional.ofNullable(dto.getDocName()).orElse(doc.getDocName()));
+        Type newType = dto.getDocTypeCode() == null ? null : typeRepo.findById(dto.getDocTypeCode()).orElseThrow(()->new AppException("Type de document inconnu"));
 
-		String oldDocPath = doc.getDocPath();
-		doc.setDocNum(Optional.ofNullable(dto.getDocNum()).orElse(doc.getDocNum()));
-		doc.setDocDescription(Optional.ofNullable(dto.getDocDescription()).orElse(doc.getDocDescription()));
-		doc.setDocName(Optional.ofNullable(dto.getDocName()).orElse(doc.getDocName()));
-		FileUtils.InputStreamDetails inputStreamDetails = FileUtils.getInputStreamDetails(file);
-		String mimeType = inputStreamDetails.getMimeType();
-		file = inputStreamDetails.getInputStream(); // Update file to use the new InputStream
-		String extension = FileUtils.getExtensionFromMimeType(mimeType);
-
-
-		doc.setDocExtension(extension);
-		doc.setDocMimeType(mimeType);
-
-		Type newType = dto.getDocTypeCode() == null ? null : typeRepo.findById(dto.getDocTypeCode()).orElseThrow(()->new AppException("Type de document inconnu"));
-
-		if(dto.getDocTypeCode() != null && !doc.getDocType().code.equals(dto.getDocTypeCode()) && file != null)
+		if(dto.getDocTypeCode() != null && !doc.getDocType().code.equals(dto.getDocTypeCode()))
 		{
 			doc.setDocType(newType);
-			String path = generatePath(extension, dto.getDocTypeCode(), doc.getDocDescription());
-			doc.setDocPath(path);
-			uploadFile(file, path);
-			//this.deleteFile(oldDocPath);
 		}
-		else if(file != null)
-		{
-			FileUtils.ComparisonResult comparisonResult = FileUtils.areFilesIdenticalByContent(file, oldDocPath);
-			if (!comparisonResult.isIdentical()) {
-				String path = generatePath(extension, dto.getDocTypeCode(), newType.name);
-				doc.setDocPath(path);
-				uploadFile(comparisonResult.getInputStream(), path);
-				//this.deleteFile(oldDocPath);
-			} else {
-				// Files are identical, update the file reference to use the new InputStream
-				file = comparisonResult.getInputStream();
-			}
-		}
+        MultipartFile file = dto.getFile();
+        if(file == null) return doc;
+        InputStream fileInputStreams = file.getInputStream();
+        String mimeType = file.getContentType();
+        String extension = FileUtils.getExtensionFromMimeType(mimeType);
+        doc.setDocExtension(extension);
+        doc.setDocMimeType(mimeType);
+        String newPath = generatePath(extension, dto.getDocTypeCode(), doc.getDocDescription());
+        doc.setDocPath(newPath);
 
-		//logService.logg(ArchiveActions.UPLOAD_DOCUMENT, doc, new Document(), ArchiveTable.DOCUMENT);
+        FileUtils.ComparisonResult comparisonResult = FileUtils.areFilesIdenticalByContent(file, oldDocPath);
+        if (!comparisonResult.isIdentical())
+        {
+            newPath = generatePath(extension, dto.getDocTypeCode(), newType.name);
+            doc.setDocPath(newPath);
+            uploadFile(comparisonResult.getInputStream(), newPath);
+        }
 		return doc;
 	}
 

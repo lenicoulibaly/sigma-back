@@ -51,6 +51,10 @@ public class VStructure
 
     private String parentSigle;
 
+    @ToString.Exclude
+    @Column(name = "search_text", length = Integer.MAX_VALUE)
+    private String searchText;
+
     // Méthodes utilitaires existantes
     public String[] getHierarchyLevels()
     {

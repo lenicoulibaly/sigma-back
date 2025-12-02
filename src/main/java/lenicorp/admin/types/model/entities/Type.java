@@ -15,13 +15,17 @@ public class Type
     public String code;
     @Column(length = 100, nullable = false)
     public String name;
-    @Column(columnDefinition = "INT DEFAULT 0")
-    public Long ordre;
+    @Column(nullable = false)
+    public Integer ordre = 0;
     @ManyToOne @JoinColumn(name = "group_code") @NotAudited
     public TypeGroup typeGroup;
     @Column(length = 255)
     public String description;
 
+    @PrePersist
+    public void prePersist() {
+        if (ordre == null) ordre = 0;
+    }
     public Type(String code)
     {
         this.code = code;

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,15 +21,14 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = {
-        ValidFileExtension.ValidFileExtensionValidatorOnDTO.class, ValidFileExtension.ValidFileExtensionValidatorOnBase64Url.class})
+        ValidFileExtension.ValidFileExtensionValidatorOnDTO.class
+        , ValidFileExtension.ValidFileExtensionValidatorOnBase64Url.class})
 @Documented
 public @interface ValidFileExtension
 {
     String message() default "Type de fichier non pris en charge";
     Class<?> [] groups() default {};
     Class<? extends Payload> [] payload() default {};
-
-
 
     @Component
     @RequiredArgsConstructor
@@ -62,17 +62,9 @@ public @interface ValidFileExtension
         {
             if(dto.getFile() == null) return true;
 
-            String extension = null;
-            try
-            {
-                InputStream file = dto.getFile().getInputStream();
-                extension = FileUtils.getExtensionFromInputStream(file);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-                throw new AppException(e.getMessage());
-            }
+            String extension;
+            MultipartFile file = dto.getFile();
+            extension = FileUtils.getExtensionFromMimeType(file.getContentType());
             if(dto.getDocTypeCode() == null) return true;
 
             return documentValidationRuleRepo.isExtensionAllowedForType(dto.getDocTypeCode(), extension);

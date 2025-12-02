@@ -17,7 +17,7 @@ import java.util.Set;
  * This entity stores information about each revision, including the user who made the change.
  */
 @Entity
-@Table(name = "REVINFO")
+@Table(schema = "audit", name = "REVINFO")
 @RevisionEntity(EnversRevisionListener.class)
 @Getter
 @Setter
@@ -25,7 +25,7 @@ public class CustomRevisionEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "revision_seq")
-    @SequenceGenerator(name = "revision_seq", sequenceName = "REVISION_SEQ", initialValue = 1)
+    @SequenceGenerator(name = "revision_seq", sequenceName = "audit.REVISION_SEQ", initialValue = 1, allocationSize = 1)
     @RevisionNumber
     private Long id;
 
@@ -36,7 +36,7 @@ public class CustomRevisionEntity implements Serializable {
     private String username;
 
     @ElementCollection
-    @JoinTable(name = "REVCHANGES", joinColumns = @JoinColumn(name = "REV"))
+    @JoinTable(schema = "audit", name = "REVCHANGES", joinColumns = @JoinColumn(name = "REV"))
     @Column(name = "ENTITYNAME")
     private Set<String> modifiedEntityNames = new HashSet<>();
 

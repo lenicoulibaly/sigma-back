@@ -1,5 +1,7 @@
 package lenicorp.admin.security.config;
 
+import lenicorp.admin.security.audit.AuditContext;
+import lenicorp.admin.security.audit.AuditContextHolder;
 import lenicorp.admin.security.controller.services.impl.SpringJwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,9 +35,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
         final String jwt;
         final String userEmail;
 
+        // Nettoyage préventif du contexte d'audit en début de traitement
+        AuditContextHolder.clear();
+
         // Skip if no Authorization header or not a Bearer token
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+            try {
+                filterChain.doFilter(request, response);
+            } finally {
+                AuditContextHolder.clear();
+            }
             return;
         }
 
@@ -63,6 +72,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
                     // Set details and store the token in the security context
                     authToken.setDetails(jwt); // Store the raw token for later retrieval
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    // Peupler le contexte d'audit
+                    String connexionId = null;
+                    try {
+                        connexionId = jwtService.extractClaim(jwt, claims -> claims.get("connexionId", String.class));
+                    } catch (Exception ignored) { }
+
+                    String ip = extractClientIp(request);
+                    String mac = request.getHeader("X-MAC-Address"); // meilleure effort via en-tête personnalisé
+
+                    AuditContextHolder.set(AuditContext.builder()
+                            .connexionId(connexionId)
+                            .ipAddress(ip)
+                            .macAddress(mac)
+                            .build());
                 }
             }
         } catch (Exception e) {
@@ -70,6 +94,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
             logger.error("JWT Authentication failed: " + e.getMessage());
         }
         
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            // Toujours nettoyer pour éviter les fuites entre requêtes/threads
+            AuditContextHolder.clear();
+        }
+    }
+
+    private String extractClientIp(HttpServletRequest request)
+    {
+        // Priorité aux en-têtes de proxy/CDN si présents
+        String xff = request.getHeader("X-Forwarded-For");
+        if (xff != null && !xff.isBlank()) {
+            // XFF peut contenir plusieurs IP séparées par virgule; on prend la première
+            String first = xff.split(",")[0].trim();
+            if (!first.isBlank()) return first;
+        }
+        String xri = request.getHeader("X-Real-IP");
+        if (xri != null && !xri.isBlank()) return xri.trim();
+        return request.getRemoteAddr();
     }
 }

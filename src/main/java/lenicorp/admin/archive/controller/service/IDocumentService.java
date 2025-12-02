@@ -37,9 +37,14 @@ public interface IDocumentService
     void displayPdf(HttpServletResponse response, byte[] reportBytes, String displayName)  throws Exception;
 
     Part downloadMultipartFile(String filePAth);
-	public String generatePath(String extension, String typeCode, String objectName) throws IOException;
+	String generatePath(String extension, String typeCode, String objectName) throws IOException;
     boolean deleteFile(String filePath);
-	void renameFile(String oldPath, String newPath);
+
+	Page<ReadDocDTO> searchObjectDocs(Long objectI, String tableName, String key, Pageable pageable);
+
+    List<byte[]> getFileByObjectIdAndTableNameAndTypeCode(Long objectId, String tableName, String typeCode);
+
+    void renameFile(String oldPath, String newPath);
 
 	Page<ReadDocDTO> getAllDocsForObject(Long userId, Long assoId, Long sectionId, String key, PageRequest pageRequest);
 

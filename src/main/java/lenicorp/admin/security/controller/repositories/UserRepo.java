@@ -121,4 +121,11 @@ public interface UserRepo extends JpaRepository<AppUser, Long>
     from VUser u where (:strId is null or locate(function('getStrChaineSigles', :strId), u.chaineSigles) = 1)
     """)
     List<UserDTO> getUsersByStructure(Long strId);
+
+    @Query("""
+    SELECT new lenicorp.admin.security.model.dtos.UserDTO(u.userId, u.email, u.password, u.activated, u.notBlocked)
+    FROM AppUser u
+    WHERE u.email = :username
+""")
+    UserDTO findMinimalByUsername(String username);
 }

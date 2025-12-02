@@ -15,15 +15,14 @@ import lenicorp.admin.security.model.entities.AppUser;
 import lenicorp.admin.security.model.entities.AuthToken;
 import lenicorp.admin.security.model.mappers.UserMapper;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.transaction.Transactional;
 import lenicorp.admin.utilities.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;

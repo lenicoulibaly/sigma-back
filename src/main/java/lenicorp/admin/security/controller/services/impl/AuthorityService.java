@@ -15,14 +15,14 @@ import lenicorp.admin.security.model.entities.AuthAssociation;
 import lenicorp.admin.security.model.mappers.AuthAssoMapper;
 import lenicorp.admin.security.model.mappers.AuthorityMapper;
 import lenicorp.admin.security.model.views.VProfile;
+import lenicorp.admin.security.model.views.VUserProfile;
 import lenicorp.admin.types.model.entities.Type;
 import lenicorp.admin.utilities.StringUtils;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -248,12 +248,14 @@ public class AuthorityService implements IAuthorityService
     {
         // Find the existing association
         AuthAssociation association = authAssoRepo.findById(dto.getId()).orElseThrow(()->new AppException("L'association avec ID " + dto.getId() + " n'existe pas"));
-        if (association == null) {
+        if (association == null)
+        {
             throw new AppException("L'association avec ID " + dto.getId() + " n'existe pas");
         }
 
         // Verify that the association has type.code="USR_PRFL"
-        if (association.getType() == null || !"USR_PRFL".equals(association.getType().code)) {
+        if (association.getType() == null || !"USR_PRFL".equals(association.getType().code))
+        {
             throw new AppException("L'association avec ID " + dto.getId() + " n'est pas de type USR_PRFL");
         }
 
@@ -290,15 +292,18 @@ public class AuthorityService implements IAuthorityService
 
     @Override
     @Transactional
-    public void revokeProfileAssignment(Long id) {
+    public void revokeProfileAssignment(Long id)
+    {
         // Find the existing association
         AuthAssociation association = authAssoRepo.findById(id).orElseThrow(()->new AppException("L'association avec ID " + id + " n'existe pas"));
-        if (association == null) {
+        if (association == null)
+        {
             throw new AppException("L'association avec ID " + id + " n'existe pas");
         }
 
         // Verify that the association has type.code="USR_PRFL"
-        if (association.getType() == null || !"USR_PRFL".equals(association.getType().code)) {
+        if (association.getType() == null || !"USR_PRFL".equals(association.getType().code))
+        {
             throw new AppException("L'association avec ID " + id + " n'est pas de type USR_PRFL");
         }
 
@@ -311,20 +316,24 @@ public class AuthorityService implements IAuthorityService
 
     @Override
     @Transactional
-    public void restoreProfileAssignment(Long id) {
+    public void restoreProfileAssignment(Long id)
+    {
         // Find the existing association
         AuthAssociation association = authAssoRepo.findById(id).orElseThrow(()->new AppException("L'association avec ID " + id + " n'existe pas"));
-        if (association == null) {
+        if (association == null)
+        {
             throw new AppException("L'association avec ID " + id + " n'existe pas");
         }
 
         // Verify that the association has type.code="USR_PRFL"
-        if (association.getType() == null || !"USR_PRFL".equals(association.getType().code)) {
+        if (association.getType() == null || !"USR_PRFL".equals(association.getType().code))
+        {
             throw new AppException("L'association avec ID " + id + " n'est pas de type USR_PRFL");
         }
 
         // Verify that the association is currently inactive
-        if (association.getAssStatus() == null || !"STA_ASS_INACT".equals(association.getAssStatus().code)) {
+        if (association.getAssStatus() == null || !"STA_ASS_INACT".equals(association.getAssStatus().code))
+        {
             throw new AppException("L'association avec ID " + id + " n'est pas dans un état inactif");
         }
 
@@ -341,12 +350,14 @@ public class AuthorityService implements IAuthorityService
     {
         // Find the association to set as default
         AuthAssociation newDefaultAssociation = authAssoRepo.findById(id).orElseThrow(()->new AppException("L'association avec ID " + id + " n'existe pas"));
-        if (newDefaultAssociation == null) {
+        if (newDefaultAssociation == null)
+        {
             throw new AppException("L'association avec ID " + id + " n'existe pas");
         }
 
         // Verify that the association has type.code="USR_PRFL"
-        if (newDefaultAssociation.getType() == null || !"USR_PRFL".equals(newDefaultAssociation.getType().code)) {
+        if (newDefaultAssociation.getType() == null || !"USR_PRFL".equals(newDefaultAssociation.getType().code))
+        {
             throw new AppException("L'association avec ID " + id + " n'est pas de type USR_PRFL");
         }
 
@@ -355,12 +366,14 @@ public class AuthorityService implements IAuthorityService
 
         // Find the current default association for this user
         // We need to use a native query to find the association with status STA_ASS_CUR for this user
-        List<AuthAssociation> currentDefaultAssociations = authAssoRepo.getCurrentAssociationList(userId);
+        List<VUserProfile> currentDefaultAssociations = authAssoRepo.getCurrentAssociationList(userId);
 
         // Update the current default association to active
-        for (AuthAssociation currentDefault : currentDefaultAssociations) {
-            currentDefault.setAssStatus(new Type("STA_ASS_ACT"));
-            authAssoRepo.save(currentDefault);
+        for (VUserProfile currentDefault : currentDefaultAssociations)
+        {
+            AuthAssociation association = authAssoRepo.findById(currentDefault.getAssId()).orElseThrow(()->new AppException("Association de profil introuvable"));
+            association.setAssStatus(new Type("STA_ASS_ACT"));
+            authAssoRepo.save(association);
         }
 
         // Set the new association as default

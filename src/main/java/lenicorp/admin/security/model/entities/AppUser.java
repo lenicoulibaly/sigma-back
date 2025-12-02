@@ -42,6 +42,13 @@ public class AppUser extends AuditableEntity
     private LocalDateTime lastLogin;
     @ManyToOne @JoinColumn(name = "str_id")
     private Structure structure;
+    private String adresse;
+    private String lieuNaissance;
+    private LocalDate dateNaissance;
+    private Long indice;
+    @ManyToOne @JoinColumn(name = "emploi_code") @NotAudited
+    private Type emploi;
+    private LocalDate datePremierePriseService;
     public AppUser(Long userId)
     {
         this.userId = userId;

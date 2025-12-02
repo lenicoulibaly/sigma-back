@@ -5,6 +5,7 @@ import lenicorp.admin.structures.model.dtos.CreateOrUpdateStrDTO;
 import lenicorp.admin.structures.model.dtos.ReadStrDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -33,6 +34,6 @@ public interface IStrService
     List<ReadStrDTO> findAllDescendants(Long parentStrId);
 
     List<ReadStrDTO> getUserVisibleStructures();
-
-    Page<ReadStrDTO> search(String key, Long parentId, String typeCode, PageRequest pageRequest);
+    List<ReadStrDTO> searchStrList(String key, Long parentId, String typeCode);
+    Page<ReadStrDTO> search(String key, Long parentId, String typeCode, Pageable pageable);
 }

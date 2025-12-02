@@ -234,7 +234,7 @@ public interface AuthAssoRepo extends JpaRepository<AuthAssociation, Long>
     @Query(value = """
             select vup.ass_id, vup.user_id, vup.email, vup.first_name, vup.last_name, 
             vup.profile_code, vup.profile_name, vup.profile_description,
-            vup.profile_str_id, vup.profile_str_name, vup.user_profile_ass_type_code, 
+            vup.ass_str_id, vup.ass_str_name, vup.user_profile_ass_type_code, 
             vup.user_profile_ass_type_name, vup.libelle, vup.starting_date, vup.ending_date,
             vup.ass_status_code, vup.ass_status_name, vup.ordre
             from v_user_profile vup 
@@ -361,7 +361,7 @@ public interface AuthAssoRepo extends JpaRepository<AuthAssociation, Long>
     List<AuthorityDTO> getAllPrivileges();
 
     @Query("""
-    select new lenicorp.admin.security.model.dtos.AuthorityDTO(vrp.roleCode, vrp.roleName, vrp.roleDescription, 'ROLE', 'ROLE', '', '')
+    select new lenicorp.admin.security.model.dtos.AuthorityDTO(vrp.privilegeCode, vrp.privilegeName, vrp.privilegeDescription, 'PRIVILEGE', 'PRIVILEGE', '', '')
     from VRolePrivilege vrp where vrp.roleCode in ?1
     """)
     List<AuthorityDTO> getPrivilegesListByRoleCodes(List<String> roleCodes);
@@ -372,7 +372,7 @@ public interface AuthAssoRepo extends JpaRepository<AuthAssociation, Long>
     List<AuthorityDTO> getAllPrivileges(List<String> roleCodes);
 
     //TODO créer la fonction getStrChaineSigles en base
-    @Query("""
+    @Query(value = """
     select new lenicorp.admin.security.model.dtos.UserProfileAssoDTO(vup.assId, vup.libelle
         , vup.userId, vup.email, u.matricule, grade.code, vup.profileCode, vup.profileName
         , vup.assStrId, vup.assStrName, vup.userProfileAssTypeCode, vup.userProfileAssTypeName
@@ -384,7 +384,7 @@ public interface AuthAssoRepo extends JpaRepository<AuthAssociation, Long>
             left join Type ass on vup.assStatusCode = ass.code
         where vup.userId = coalesce(:userId, vup.userId) 
             and vup.profileCode = coalesce(:profileCode, vup.profileCode) 
-            and locate(vup.assStrChaineSigles, cast(function('getStrChaineSigles',  :strId) as string)) = 1 and 
+            and locate(cast(function('getStrChaineSigles',  :strId) as string), vup.assStrChaineSigles) = 1 and 
             (
                 locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.profileCode, '') ) as string))) >0 or
                 locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.profileName, '') ) as string))) >0 or
@@ -397,7 +397,28 @@ public interface AuthAssoRepo extends JpaRepository<AuthAssociation, Long>
                 locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.assStrSigles, '') ) as string))) >0 or   
                 locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.assStrSigles, '') ) as string))) >0
             )   
-    """)
+    """, countQuery = """
+    select count (vup.assId)
+    from VUserProfile vup 
+            join AppUser u on vup.userId = u.userId 
+            left join u.grade grade 
+            left join Type ass on vup.assStatusCode = ass.code
+        where vup.userId = coalesce(:userId, vup.userId) 
+            and vup.profileCode = coalesce(:profileCode, vup.profileCode) 
+            and locate(cast(function('getStrChaineSigles',  :strId) as string), vup.assStrChaineSigles) = 1 and 
+            (
+                locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.profileCode, '') ) as string))) >0 or
+                locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.profileName, '') ) as string))) >0 or
+                locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.profileDescription, '') ) as string))) >0 or
+                locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.firstName, '') ) as string))) >0 or
+                locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.lastName, '') ) as string))) >0 or    
+                locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.email, '') ) as string))) >0 or
+                locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.libelle, '') ) as string))) >0 or
+                locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.assStrName, '') ) as string))) >0 or
+                locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.assStrSigles, '') ) as string))) >0 or   
+                locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vup.assStrSigles, '') ) as string))) >0
+            )   
+""")
     Page<UserProfileAssoDTO> searchUserProfileAssignments(Long userId, Long strId, String profileCode, String key, Pageable pageable);
 
     @Query("""
@@ -419,5 +440,5 @@ public interface AuthAssoRepo extends JpaRepository<AuthAssociation, Long>
     Page<UserProfileAssoDTO> searchUserProfileAssignments(Long userId, String profileCode, String key, Pageable pageable);
 
     @Query("select vup from VUserProfile vup where vup.userId = ?1 and vup.assStatusCode = 'STA_ASS_CUR'")
-    List<AuthAssociation> getCurrentAssociationList(Long userId);
+    List<VUserProfile> getCurrentAssociationList(Long userId);
 }

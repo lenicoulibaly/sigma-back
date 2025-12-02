@@ -38,6 +38,15 @@ public class TypeDTO
     @ExistingGroupCode(groups = {CreateGroup.class, UpdateGroup.class})
     private String groupCode;
     private String description;
+    private String statut;
+
+    public TypeDTO(String code, String name, String description, String statut)
+    {
+        this.code = code;
+        this.name = name;
+        this.description = description;
+        this.statut = statut;
+    }
 
     public TypeDTO(String code, String name, Long ordre, String groupCode, String description)
     {
@@ -46,6 +55,12 @@ public class TypeDTO
         this.ordre = ordre;
         this.groupCode = groupCode;
         this.description = description;
+    }
+
+    // Overload to support JPQL constructor expression when 'ordre' is an Integer in entity
+    public TypeDTO(String code, String name, Integer ordre, String groupCode, String description)
+    {
+        this(code, name, ordre == null ? null : ordre.longValue(), groupCode, description);
     }
 
     private List<TypeDTO> sousTypes = new ArrayList<>();

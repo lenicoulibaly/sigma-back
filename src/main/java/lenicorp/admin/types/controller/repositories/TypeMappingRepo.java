@@ -53,7 +53,7 @@ public interface TypeMappingRepo extends JpaRepository<TypeMapping, Long> {
      * mais dont le code ne fait pas partie de la liste de code fournie en 2n paramètre
      */
     @Query("""
-    select t.code from TypeMapping tm join tm.child t where tm.parent.code = ?1 and t.code not in ?2
+    select distinct t.code from TypeMapping tm join tm.child t where tm.parent.code = ?1 and t.code not in ?2
     """)
     List<String> findSousTypeCodesToRemove(String code, List<String> inputSousTypeCodes);
 
@@ -67,8 +67,8 @@ public interface TypeMappingRepo extends JpaRepository<TypeMapping, Long> {
      * mais qui ne sont pas enfants du type dont le code est passé en 1er premier paramètre
      */
     @Query("""
-    select c.code from TypeMapping tm join tm.child c where c.code in ?2 
-        and not exists (select tm2 from TypeMapping tm2 where tm2.child.code = c.code and tm.parent.code = ?1)
+    select t.code from Type t where t.code in ?2 and 
+    not exists (select tm from TypeMapping tm where tm.parent.code = ?1 and tm.child.code = t.code)
     """)
     List<String> findSousTypeCodesToAdd(@NotNull(message = "Le code est obligatoire") @NotBlank(message = "Le code est obligatoire") String code, List<String> inputSousTypeCodes);
 

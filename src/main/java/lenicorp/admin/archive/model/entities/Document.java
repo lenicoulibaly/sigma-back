@@ -34,11 +34,11 @@ public class Document extends AuditableEntity
 	private String docMimeType;
 	@ManyToOne @JoinColumn(name = "TYPE_CODE") @NotAudited
 	private Type docType;
-	@ManyToOne @JoinColumn(name = "USER_ID")
-	private AppUser user;
 
 	@ManyToOne @JoinColumn(name = "TABLE_NAME")
-	private Type docTableName;
+	private Type objectTableName;
 
 	private Long objectId; //L'ID de l'objet auquel appartient le document
+
+    private byte[] file;
 }

@@ -1,6 +1,5 @@
 package lenicorp.admin.security.controller.web;
 
-import lenicorp.admin.archive.model.dtos.validator.OnCreate;
 import lenicorp.admin.security.controller.services.specs.IUserService;
 import lenicorp.admin.security.model.dtos.AuthResponse;
 import lenicorp.admin.security.model.dtos.CreateUserDTO;
@@ -36,7 +35,7 @@ public class UserController
         return userService.refreshToken(userId);
     }
 
-    @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/open/create", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @RolesAllowed("CRT_USR")
     public UserDTO createUser(@Valid @ConvertGroup(to = CreateGroup.class) @RequestBody UserDTO user)
     {

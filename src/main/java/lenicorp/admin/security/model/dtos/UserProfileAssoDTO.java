@@ -59,4 +59,32 @@ public class UserProfileAssoDTO implements Serializable
     Long ordre;
     String firstName;
     String lastName;
+
+    public UserProfileAssoDTO(Long id, String libelle, Long userId, String email, String matricule, String gradeCode,
+                               String profileCode, String profileName, Long strId, String strName,
+                               String userProfileAssTypeCode, String userProfileAssTypeName,
+                               LocalDate startingDate, LocalDate endingDate,
+                               String assStatusCode, String assStatusName,
+                               Integer ordre, String firstName, String lastName)
+    {
+        this.id = id;
+        this.libelle = libelle;
+        this.userId = userId;
+        this.email = email;
+        this.matricule = matricule;
+        this.gradeCode = gradeCode;
+        this.profileCode = profileCode;
+        this.profileName = profileName;
+        this.strId = strId;
+        this.strName = strName;
+        this.userProfileAssTypeCode = userProfileAssTypeCode;
+        this.userProfileAssTypeName = userProfileAssTypeName;
+        this.startingDate = startingDate;
+        this.endingDate = endingDate;
+        this.assStatusCode = assStatusCode;
+        this.assStatusName = assStatusName;
+        this.ordre = ordre == null ? null : ordre.longValue();
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
 }

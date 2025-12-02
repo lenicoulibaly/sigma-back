@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDate;
 
@@ -17,7 +18,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "v_user_profile")
+@Table(name = "v_user_profile") @Immutable
 public class VUserProfile
 {
     @Id
@@ -54,4 +55,12 @@ public class VUserProfile
     @Size(max = 255)
     @Column(name = "association_type")
     private String associationType;
+
+    @Size(max = 100)
+    @Column(name = "ass_status_name", length = 100)
+    private String assStatusName;
+
+    @Column(name = "ordre")
+    private Integer ordre;
+
 }

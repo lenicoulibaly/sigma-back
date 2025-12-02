@@ -1,109 +1,41 @@
 package lenicorp.admin.archive.controller.web;
 
-import lenicorp.admin.archive.controller.service.AbstractDocumentService;
-import lenicorp.admin.archive.controller.service.DocServiceProvider;
+import lenicorp.admin.archive.controller.service.IDocumentService;
 import lenicorp.admin.archive.model.dtos.request.UpdateDocReq;
 import lenicorp.admin.archive.model.dtos.request.UploadDocReq;
-import lenicorp.admin.archive.model.dtos.response.Base64FileDto;
 import lenicorp.admin.archive.model.dtos.response.ReadDocDTO;
 import lenicorp.admin.archive.model.entities.Document;
-import lenicorp.admin.types.model.dtos.TypeDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
-@RestController
-@RequestMapping("/documents")
-public class DocumentResource {
+@RestController @RequestMapping("/documents") @RequiredArgsConstructor
+@Validated
+public class DocumentResource
+{
+    private final IDocumentService docService;
 
-    @Autowired
-    private DocServiceProvider docServiceProvider;
-
-    @Autowired 
-    private AbstractDocumentService docService;
-
-    @GetMapping("/{typeDocUniqueCode}/types")
-    public List<TypeDTO> getTypeDocumentReglement(@PathVariable("typeDocUniqueCode") String typeDocUniqueCode)
+    @Validated()
+    @PostMapping(value = "/{objectTableName}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Document uploadDocument( @Validated
+            @ModelAttribute UploadDocReq dto,
+            @PathVariable("objectTableName") String objectTableName) throws IOException
     {
-        AbstractDocumentService docService = docServiceProvider.getDocUploader(typeDocUniqueCode);
-        return docService.getTypeDocumentReglement(typeDocUniqueCode);
+        dto.setObjectTableName(objectTableName);
+        return docService.uploadDocument(dto);
     }
 
-    @PostMapping("/{groupDocUniqueCode}/upload")
-    public Document uploadDocument(
-            @RequestParam("objectId") Long objectId,
-            @RequestParam("docTypeCode") String docTypeCode,
-            @RequestParam(value = "docNum", required = false) String docNum,
-            @RequestParam(value = "docName", required = false) String docName,
-            @RequestParam(value = "docDescription", required = false) String docDescription,
-            @RequestParam("file") MultipartFile file,
-            @PathVariable("groupDocUniqueCode") String groupDocUniqueCode) throws IOException
-    {
-        groupDocUniqueCode = groupDocUniqueCode == null || groupDocUniqueCode.trim().equals("") 
-            ? ""
-            : groupDocUniqueCode.replace("-", "_").toUpperCase();
-
-        AbstractDocumentService docUploader = docServiceProvider.getDocUploader(groupDocUniqueCode);
-
-        // Create a DTO with the parameters
-        UploadDocReq dto = new UploadDocReq();
-        dto.setObjectId(objectId);
-        dto.setDocTypeCode(docTypeCode);
-        dto.setDocNum(docNum);
-        dto.setDocName(docName);
-        dto.setDocDescription(docDescription);
-
-        // Convert MultipartFile to InputStream
-        try (InputStream inputStream = file.getInputStream()) {
-            // Use reflection to set the file field
-            java.lang.reflect.Field fileField = UploadDocReq.class.getDeclaredField("file");
-            fileField.setAccessible(true);
-            fileField.set(dto, inputStream);
-
-            Document doc = docUploader.uploadDocument(dto);
-            return doc;
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new IOException("Error processing file: " + e.getMessage(), e);
-        }
-    }
-
-    @PutMapping("/update")
-    public Document updateDocument(
-            @RequestParam("docId") Long docId,
-            @RequestParam(value = "docTypeCode", required = false) String docTypeCode,
-            @RequestParam(value = "docNum", required = false) String docNum,
-            @RequestParam(value = "docName", required = false) String docName,
-            @RequestParam(value = "docDescription", required = false) String docDescription,
-            @RequestParam("file") MultipartFile file) throws IOException {
-
-        // Create a DTO with the parameters
-        UpdateDocReq dto = new UpdateDocReq();
-        dto.setDocId(docId);
-        dto.setDocTypeCode(docTypeCode);
-        dto.setDocNum(docNum);
-        dto.setDocName(docName);
-        dto.setDocDescription(docDescription);
-
-        // Convert MultipartFile to InputStream
-        try (InputStream inputStream = file.getInputStream()) {
-            // Use reflection to set the file field
-            java.lang.reflect.Field fileField = UpdateDocReq.class.getDeclaredField("file");
-            fileField.setAccessible(true);
-            fileField.set(dto, inputStream);
-
-            Document doc = docService.updateDocument(dto);
-            return doc;
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new IOException("Error processing file: " + e.getMessage(), e);
-        }
+    @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Document updateDocument(@ModelAttribute UpdateDocReq dto) throws IOException {
+        return docService.updateDocument(dto);
     }
 
     @DeleteMapping("/delete/{docId}")
@@ -111,44 +43,6 @@ public class DocumentResource {
     {
         boolean result = docService.deleteDocument(docId);
         return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/users/{userId}")
-    public ResponseEntity<List<ReadDocDTO>> getUserDocs(
-            @PathVariable("userId") Long userId,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "key", defaultValue = "") String key) {
-        // For now, return an empty list
-        // In a real implementation, you would query the database for documents
-        return ResponseEntity.ok(new ArrayList<ReadDocDTO>());
-    }
-
-    @GetMapping("/associations/{assoId}")
-    public ResponseEntity<List<ReadDocDTO>> getAssociationDocs(
-            @PathVariable("assoId") Long assoId,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "key", defaultValue = "") String key) {
-        // For now, return an empty list
-        // In a real implementation, you would query the database for documents
-        return ResponseEntity.ok(new ArrayList<ReadDocDTO>());
-    }
-
-    @GetMapping("/sections/{sectionId}")
-    public ResponseEntity<List<ReadDocDTO>> getSectionDocs(
-            @PathVariable("sectionId") Long sectionId,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "key", defaultValue = "") String key) {
-        // For now, return an empty list
-        // In a real implementation, you would query the database for documents
-        return ResponseEntity.ok(new ArrayList<ReadDocDTO>());
-    }
-
-    @GetMapping("/get-base64/{docId}")
-    public Base64FileDto displayDocument(@PathVariable("docId") Long docId) throws Exception {
-        return docService.displayDocument(docId);
     }
 
     @GetMapping(value = "/download/{docId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
@@ -160,5 +54,14 @@ public class DocumentResource {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + doc.getDocName() + "\"")
                 .header(HttpHeaders.CONTENT_TYPE, doc.getDocMimeType())
                 .body(fileBytes);
+    }
+
+    @GetMapping(value = "/search/{tableName}/{objectId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Page<ReadDocDTO> searchObjectDocs(@PathVariable(value = "tableName", required = true) String tableName,
+                                             @PathVariable(value = "objectId", required = true) Long objectId,
+                                             @RequestParam(value = "key", required = false) String key, Pageable pageable)
+    {
+        tableName = tableName.toUpperCase();
+        return docService.searchObjectDocs(objectId, tableName, key, pageable);
     }
 }

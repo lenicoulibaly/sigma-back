@@ -7,8 +7,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 /**
  * Listener for revision entity to automatically populate the username field.
  */
-public class CustomRevisionListener implements RevisionListener {
-
+public class CustomRevisionListener implements RevisionListener
+{
     @Override
     public void newRevision(Object revisionEntity) {
         CustomRevisionEntity revision = (CustomRevisionEntity) revisionEntity;

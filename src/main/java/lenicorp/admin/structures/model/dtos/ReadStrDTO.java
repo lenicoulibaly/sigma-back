@@ -29,7 +29,9 @@ public class ReadStrDTO
 
     private String chaineSigles;
 
-    public ReadStrDTO(Long strId, String strName, String strTypeName, String strSigle, String strTypeCode, String strTel, String strAddress, String situationGeo, Long parentId, String parentName, String parentSigle, Long strLevel, String chaineSigles)
+    public ReadStrDTO(Long strId, String strName, String strTypeName, String strSigle, String strTypeCode
+            , String strTel, String strAddress, String situationGeo, Long parentId, String parentName
+            , String parentSigle, Long strLevel, String chaineSigles)
     {
         this.strId = strId;
         this.strName = strName;

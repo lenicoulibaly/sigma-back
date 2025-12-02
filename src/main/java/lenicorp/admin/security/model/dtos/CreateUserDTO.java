@@ -55,6 +55,15 @@ public class CreateUserDTO
     @ExistingTypeCode(message = "Type d'assignation inconnu", groups = {CreateGroup.class}, typeGroupCode = "USR_PRFL_TYPE")
     private String userProfileAssTypeCode; // Utiliser useTypesByGroupCode("USR_PRFL_TYPE") pour la liste déroulante
 
+    @ValidCodeCivilite
+    @NotNull(message = "La civilité est obligatoire")
+    private String codeCivilite;
+
+    @ValidEmploiCode
+    private String emploiCode;
+
+    private Long indice;
+
     private LocalDate startingDate;
     private LocalDate endingDate;
 }

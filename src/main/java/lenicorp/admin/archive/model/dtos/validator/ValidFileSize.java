@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,17 +46,10 @@ public @interface ValidFileSize
             String docTypeCode = dto.getDocTypeCode();
             if(docTypeCode == null) return true;
 
-            String extension = null;
-            InputStream file = null;
-            try
-            {
-                file = dto.getFile().getInputStream();
-                extension = FileUtils.getExtensionFromInputStream(file);
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-                throw new AppException(e.getMessage());
-            }
+            String extension;
+            MultipartFile file;
+            file = dto.getFile();
+            extension = FileUtils.getExtensionFromMimeType(file.getContentType());
             if(extension == null || extension.isEmpty()) return true;
 
             // Get max file size for this document type and extension
@@ -65,17 +59,7 @@ public @interface ValidFileSize
             if(maxSize == null) {
                 maxSize = defaultMaxSize;
             }
-            FileUtils.InputStreamDetails streamDetails = null;
-            try
-            {
-                streamDetails = FileUtils.getInputStreamDetails(file);
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-                throw new AppException(e.getMessage());
-            }
-
-            return streamDetails.getSize() <= maxSize;
+            return file.getSize() <= maxSize;
         }
     }
 }

@@ -2,6 +2,7 @@ package lenicorp.admin.archive.model.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -46,10 +47,10 @@ public class FileUtils {
         MIME_TO_EXTENSION.put("video/quicktime", "mov");
     }
 
-    public static String getExtensionFromInputStream(InputStream file) throws IOException
+    public static String getExtensionFromMultipartFile(MultipartFile file) throws IOException
     {
-        InputStreamDetails mimeTypeResult = getInputStreamDetails(file);
-        return getExtensionFromMimeType(mimeTypeResult.getMimeType());
+        String mimeType = file.getContentType();
+        return getExtensionFromMimeType(mimeType);
     }
 
     public static String getExtensionFromMimeType(String mimeType)
@@ -163,6 +164,56 @@ public class FileUtils {
             e.printStackTrace();
             // In case of error, return false and a null input stream
             return new ComparisonResult(false, null);
+        }
+    }
+
+    /**
+     * Compare le contenu d'un {@link MultipartFile} avec un fichier local référencé par son chemin.
+     * Retourne également un nouveau {@link InputStream} permettant de réutiliser le contenu uploadé
+     * après la comparaison.
+     *
+     * Stratégie: on lit le contenu du {@code MultipartFile} en mémoire (byte[]) afin de pouvoir
+     * le comparer et fournir un nouveau flux réutilisable, puis on compare aux octets du fichier local.
+     *
+     * @param multipartFile   le fichier uploadé (MultipartFile)
+     * @param localFilePath   le chemin absolu ou relatif du fichier local à comparer
+     * @return {@link ComparisonResult} contenant le résultat de la comparaison et un nouveau {@link InputStream}
+     */
+    public static ComparisonResult areFilesIdenticalByContent(MultipartFile multipartFile, String localFilePath) {
+        if (multipartFile == null || localFilePath == null) {
+            return new ComparisonResult(false, null);
+        }
+        try {
+            File localFile = new File(localFilePath);
+
+            // Lire tous les octets du MultipartFile pour pouvoir rendre un nouveau InputStream ensuite
+            byte[] remoteBytes = multipartFile.getBytes();
+
+            // Si le fichier local n'existe pas ou n'est pas un fichier, ils ne sont pas identiques
+            if (!localFile.exists() || !localFile.isFile()) {
+                return new ComparisonResult(false, new ByteArrayInputStream(remoteBytes));
+            }
+
+            // Comparaison des tailles d'abord (rapide)
+            long remoteSize = multipartFile.getSize();
+            long localSize = localFile.length();
+            if (remoteSize != -1 && remoteSize != localSize) {
+                return new ComparisonResult(false, new ByteArrayInputStream(remoteBytes));
+            }
+
+            // Comparaison byte à byte
+            byte[] localBytes = Files.readAllBytes(localFile.toPath());
+            boolean identical = Arrays.equals(remoteBytes, localBytes);
+
+            return new ComparisonResult(identical, new ByteArrayInputStream(remoteBytes));
+        } catch (IOException e) {
+            e.printStackTrace();
+            try {
+                // tenter de renvoyer tout de même un flux réutilisable du multipart si possible
+                return new ComparisonResult(false, multipartFile != null ? new ByteArrayInputStream(multipartFile.getBytes()) : null);
+            } catch (IOException ex) {
+                return new ComparisonResult(false, null);
+            }
         }
     }
 }

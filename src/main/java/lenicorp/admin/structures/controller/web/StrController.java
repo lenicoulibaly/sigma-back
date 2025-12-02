@@ -29,6 +29,13 @@ public class StrController
         return strService.searchStrs(key, typeCode, PageRequest.of(page, size));
     }
 
+    @GetMapping("/open/search-list")
+    public List<ReadStrDTO> searchList(@RequestParam(value = "key", required = false, defaultValue = "") String key,
+                                   @RequestParam(value = "typeCode", required = false) String typeCode)
+    {
+        return strService.searchStrList(key, null, typeCode);
+    }
+
     @PostMapping("/create")
     public ReadStrDTO createStr(CreateOrUpdateStrDTO dto)
     {

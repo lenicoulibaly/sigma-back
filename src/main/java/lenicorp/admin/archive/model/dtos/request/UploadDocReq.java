@@ -20,4 +20,5 @@ public class UploadDocReq
     private String docName;
     private String docDescription;
     private MultipartFile file;
+    private String objectTableName;
 }

@@ -28,8 +28,6 @@ public abstract class UserMapper
     @Mapping(target = "createdBy", ignore = true) // Géré par AuditableEntity
     @Mapping(target = "updatedAt", ignore = true) // Géré par AuditableEntity
     @Mapping(target = "updatedBy", ignore = true) // Géré par AuditableEntity
-    @Mapping(target = "actionName", ignore = true) // Géré par AuditableEntity
-    @Mapping(target = "actionId", ignore = true) // Géré par AuditableEntity
     @Mapping(target = "connexionId", ignore = true)
     @Mapping(target = "password", ignore = true) // Ne pas mapper le champ de confirmation
     // Géré par AuditableEntity
@@ -43,8 +41,6 @@ public abstract class UserMapper
     @Mapping(target = "createdBy", ignore = true) // Ne pas modifier lors de la mise à jour
     @Mapping(target = "updatedAt", ignore = true) // Géré par AuditableEntity
     @Mapping(target = "updatedBy", ignore = true) // Géré par AuditableEntity
-    @Mapping(target = "actionName", ignore = true) // Géré par AuditableEntity
-    @Mapping(target = "actionId", ignore = true) // Géré par AuditableEntity
     @Mapping(target = "connexionId", ignore = true)
     @Mapping(target = "password", ignore = true)
     // Géré par AuditableEntity
@@ -98,8 +94,6 @@ public abstract class UserMapper
     @Mapping(target = "createdBy", ignore = true) // Géré par AuditableEntity
     @Mapping(target = "updatedAt", ignore = true) // Géré par AuditableEntity
     @Mapping(target = "updatedBy", ignore = true) // Géré par AuditableEntity
-    @Mapping(target = "actionName", ignore = true) // Géré par AuditableEntity
-    @Mapping(target = "actionId", ignore = true) // Géré par AuditableEntity
     @Mapping(target = "connexionId", ignore = true)
     @Mapping(target = "password", ignore = true) // Le mot de passe sera généré lors de l'activation
     @Mapping(target = "activated", constant = "false") // L'utilisateur n'est pas activé par défaut
