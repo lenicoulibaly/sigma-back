@@ -53,9 +53,8 @@ public interface IDocumentService
 	void uploadFile(MultipartFile file, String destinationPath) throws RuntimeException;
 
 	//------
+    Document getDocumentById(Long docId);
 
-	// New methods
-	List<TypeDTO> getTypeDocumentReglement(String typeDocUniqueCode);
-	Base64FileDto displayDocument(Long docId) throws Exception;
-	Document getDocumentById(Long docId);
+    // Latest document fetcher
+    ReadDocDTO getLatestByTypeAndObject(Long objectId, String tableName, String typeCode);
 }

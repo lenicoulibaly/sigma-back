@@ -64,4 +64,15 @@ public class DocumentResource
         tableName = tableName.toUpperCase();
         return docService.searchObjectDocs(objectId, tableName, key, pageable);
     }
+
+    // Récupérer le document le plus récent pour un type/code et un objet
+    @GetMapping(value = "/open/latest", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ReadDocDTO getLatest(@RequestParam("typeCode") String typeCode,
+                                @RequestParam("objectId") Long objectId,
+                                @RequestParam("objectTableName") String objectTableName) {
+        String table = objectTableName == null ? null : objectTableName.toUpperCase();
+        return docService.getLatestByTypeAndObject(objectId, table, typeCode);
+    }
+
+
 }

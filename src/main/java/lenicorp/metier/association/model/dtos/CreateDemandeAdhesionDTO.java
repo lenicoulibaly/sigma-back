@@ -11,5 +11,6 @@ public record CreateDemandeAdhesionDTO(
         String message,
         @AssertTrue(message = "Vous devez accepter le RGPD") boolean accepteRgpd,
         @AssertTrue(message = "Vous devez accepter la charte d'adhésion") boolean accepteCharte,
+        @AssertTrue(message = "Vous devez approuver les statuts et règlements") boolean accepteStatutsReglements,
         List<UploadDocReq> documents
 ) {}

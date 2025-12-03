@@ -41,6 +41,7 @@ public class DemandeAdhesion extends AuditableEntity
     private String motifRefus;
     private Boolean accepteCharte;
     private Boolean accepteRgpd;
+    private Boolean accepteStatutsReglements;
 
     @Column(length = 4000)
     private String message;

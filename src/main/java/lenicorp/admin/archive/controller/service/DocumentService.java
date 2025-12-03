@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.*;
 
@@ -112,6 +113,20 @@ public class DocumentService implements IDocumentService
         return logos;
     }
 
+    @Override
+    public ReadDocDTO getLatestByTypeAndObject(Long objectId, String tableName, String typeCode) {
+        List<ReadDocDTO> docs = docRepo.findLatestByObjectAndTableAndType(objectId, tableName, typeCode, PageRequest.of(0, 1));
+        if (docs == null || docs.isEmpty()) return null;
+        ReadDocDTO dto = docs.get(0);
+        try {
+            byte[] bytes = downloadFile(dto.getDocPath());
+            dto.setFile(bytes);
+        } catch (Exception ex) {
+            throw new AppException("Erreur lors du chargement du fichier: " + ex.getMessage());
+        }
+        return dto;
+    }
+
 	@Override
 	public void renameFile(String oldPath, String newPath)
 	{
@@ -128,24 +143,34 @@ public class DocumentService implements IDocumentService
 	@Override
 	public void uploadFile(MultipartFile file, String destinationPath) throws RuntimeException
 	{
-		try
-		{
-			Files.write(Paths.get(destinationPath), file.getBytes());
-		} catch (IOException e)
-		{
-			e.printStackTrace();
+		try {
+			Path dest = Paths.get(destinationPath);
+			Path parent = dest.getParent();
+			if (parent != null) {
+				Files.createDirectories(parent);
+			}
+			try (InputStream is = file.getInputStream()) {
+				Files.copy(is, dest, StandardCopyOption.REPLACE_EXISTING);
+			}
+		} catch (IOException e) {
+			throw new AppException("Erreur lors de l'enregistrement du fichier: " + e.getMessage());
 		}
 	}
 
 	@Override
 	public void uploadFile(InputStream file, String destinationPath) throws RuntimeException
 	{
-		try
-		{
-			Files.write(Paths.get(destinationPath), file.readAllBytes());
-		} catch (IOException e)
-		{
-			e.printStackTrace();
+		try {
+			Path dest = Paths.get(destinationPath);
+			Path parent = dest.getParent();
+			if (parent != null) {
+				Files.createDirectories(parent);
+			}
+			Files.copy(file, dest, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			throw new AppException("Erreur lors de l'enregistrement du fichier: " + e.getMessage());
+		} finally {
+			try { file.close(); } catch (IOException ignored) {}
 		}
 	}
 
@@ -327,38 +352,8 @@ public class DocumentService implements IDocumentService
 	}
 
 	@Override
-	public List<TypeDTO> getTypeDocumentReglement(String typeDocUniqueCode) {
-		if (typeDocUniqueCode == null) {
-			return new ArrayList<>();
-		}
-
-		Optional<Type> typeDocOpt = typeRepo.findById(typeDocUniqueCode.toUpperCase());
-		if (typeDocOpt.isEmpty()) {
-			throw new AppException("Type de document inconnu");
-		}
-
-		Type typeDoc = typeDocOpt.get();
-		if (!typeRepo.existsByCodeAndGroupCode(typeDoc.code, "DOC")) {
-			return new ArrayList<>();
-		}
-
-		return typeRepo.findDirectSousTypes(typeDoc.code);
-	}
-
-	@Override
-	public Base64FileDto displayDocument(Long docId) throws Exception {
-		Document doc = getDocumentById(docId);
-		if (doc == null) return null;
-
-		String docPath = doc.getDocPath();
-		byte[] docBytes = downloadFile(docPath);
-		String base64String = Base64ToFileConverter.convertBytesToBase64String(docBytes);
-
-		return new Base64FileDto(base64String, docBytes);
-	}
-
-	@Override
-	public Document getDocumentById(Long docId) {
+	public Document getDocumentById(Long docId)
+    {
 		if (docId == null) {
 			throw new AppException("L'identifiant du document ne peut être null");
 		}
@@ -367,7 +362,6 @@ public class DocumentService implements IDocumentService
 		if (doc == null) {
 			throw new AppException("Document inexistant");
 		}
-
 		return doc;
 	}
 }

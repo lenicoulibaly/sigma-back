@@ -76,6 +76,8 @@ public class AdhesionDTO
     private boolean accepteRgpd;
     @AssertTrue(message = "Vous devez accepter la charte d'adhésion")
     private boolean accepteCharte;
+    @AssertTrue(message = "Vous devez approuver les statuts et règlements")
+    private boolean accepteStatutsReglements;
 
     public AdhesionDTO(Long userId, Long sectionId, Long assoId, Long adhesionId, String sectionName, String assoName) {
         this.userId = userId;

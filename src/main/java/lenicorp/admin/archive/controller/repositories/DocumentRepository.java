@@ -99,4 +99,16 @@ public interface DocumentRepository extends JpaRepository<Document, Long>
         from Document d where d.objectId = ?1 and d.objectTableName.code = ?2 and d.docType.code = ?3
     """)
     List<ReadDocDTO> findByObjectIdAndTableNameAndTypeCode(Long assoId, String tableName, String typeCode);
+
+    @Query("""
+    select new lenicorp.admin.archive.model.dtos.response.ReadDocDTO(
+        d.docId, d.docNum, d.docName, d.docDescription, d.docPath
+            , d.docType.code, d.docType.name, d.docExtension, d.docMimeType)
+        from Document d where d.objectId = :objectId and d.objectTableName.code = :tableName and d.docType.code = :typeCode
+        order by d.docId desc
+    """)
+    List<ReadDocDTO> findLatestByObjectAndTableAndType(@Param("objectId") Long objectId,
+                                                       @Param("tableName") String tableName,
+                                                       @Param("typeCode") String typeCode,
+                                                       Pageable pageable);
 }
