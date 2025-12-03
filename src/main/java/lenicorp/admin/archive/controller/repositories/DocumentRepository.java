@@ -111,4 +111,15 @@ public interface DocumentRepository extends JpaRepository<Document, Long>
                                                        @Param("tableName") String tableName,
                                                        @Param("typeCode") String typeCode,
                                                        Pageable pageable);
+
+    /**
+     * Vérifie s'il existe au moins un document pour un objet/table/type donnés
+     */
+    @Query("""
+        select (count(d) > 0) from Document d
+        where d.objectId = :objectId and d.objectTableName.code = :tableName and d.docType.code = :typeCode
+    """)
+    boolean existsByObjectAndTableAndType(@Param("objectId") Long objectId,
+                                          @Param("tableName") String tableName,
+                                          @Param("typeCode") String typeCode);
 }

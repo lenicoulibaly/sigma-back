@@ -64,8 +64,16 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
     public ReadDemandeAdhesionDTO create(CreateDemandeAdhesionDTO dto) {
         if (dto.assoId() == null) throw new AppException("Association requise");
         if (!dto.accepteRgpd()) throw new AppException("Veuillez accepter le RGPD");
-        if (!dto.accepteCharte()) throw new AppException("Vous devez accepter la charte d'adhésion");
-        if (!dto.accepteStatutsReglements()) throw new AppException("Vous devez approuver les statuts et règlements");
+        // Validation conditionnelle de la charte et des statuts/règlements via méthodes repository (existence)
+        boolean charteExiste = documentService.existsByTypeAndObject(dto.assoId(), "ASSOCIATION", "CHRT_ADH");
+        boolean statutsReglementsExiste = documentService.existsByTypeAndObject(dto.assoId(), "ASSOCIATION", "DOC_ASSO_STATUTS_REGLEMENTS");
+
+        if (charteExiste && !dto.accepteCharte()) {
+            throw new AppException("Vous devez accepter la charte d'adhésion");
+        }
+        if (statutsReglementsExiste && !dto.accepteStatutsReglements()) {
+            throw new AppException("Vous devez approuver les statuts et règlements");
+        }
         // MapStruct mapping from DTO -> Entity, with current user from jwt
         DemandeAdhesion d = demandeAdhesionMapper.mapTopDemandeAdhesion(dto, jwtService);
         d.setStatut(type(EN_ATTENTE));

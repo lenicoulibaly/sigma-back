@@ -57,4 +57,7 @@ public interface IDocumentService
 
     // Latest document fetcher
     ReadDocDTO getLatestByTypeAndObject(Long objectId, String tableName, String typeCode);
+
+    // Existence check for a document by object, table and type
+    boolean existsByTypeAndObject(Long objectId, String tableName, String typeCode);
 }

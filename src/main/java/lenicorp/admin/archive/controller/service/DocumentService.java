@@ -127,6 +127,11 @@ public class DocumentService implements IDocumentService
         return dto;
     }
 
+    @Override
+    public boolean existsByTypeAndObject(Long objectId, String tableName, String typeCode) {
+        return docRepo.existsByObjectAndTableAndType(objectId, tableName, typeCode);
+    }
+
 	@Override
 	public void renameFile(String oldPath, String newPath)
 	{

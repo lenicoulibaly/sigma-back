@@ -28,7 +28,7 @@ public class DemandeAdhesionController
 
     // Inscription: crée l'utilisateur + la demande d'adhésion, puis téléverse les documents
     // Utilise multipart/form-data pour permettre l'envoi des fichiers (MultipartFile) dans AdhesionDTO.documents
-    @PostMapping(value = "/inscription", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/open/inscription", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ReadDemandeAdhesionDTO createUserWithDemande(@Valid @ModelAttribute AdhesionDTO dto) {
         return service.createUserWithDemandeAdhesion(dto);
     }

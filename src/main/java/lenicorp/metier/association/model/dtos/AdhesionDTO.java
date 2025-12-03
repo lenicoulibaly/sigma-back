@@ -66,17 +66,17 @@ public class AdhesionDTO
     private String emploiCode;
     private String emploiName;
     @ExistingStrId
-    private String strId;
+    private Long strId;
     private String strName;
     private List<UploadDocReq> documents;
     private UserProfileAssoDTO profileDto;
 
     // Confirmations d'acceptation (alignées avec CreateDemandeAdhesionDTO)
+    // RGPD: toujours requis
     @AssertTrue(message = "Vous devez accepter le RGPD")
     private boolean accepteRgpd;
-    @AssertTrue(message = "Vous devez accepter la charte d'adhésion")
+    // Charte & Statuts/Règlements: requis uniquement si les documents existent pour l'association
     private boolean accepteCharte;
-    @AssertTrue(message = "Vous devez approuver les statuts et règlements")
     private boolean accepteStatutsReglements;
 
     public AdhesionDTO(Long userId, Long sectionId, Long assoId, Long adhesionId, String sectionName, String assoName) {
