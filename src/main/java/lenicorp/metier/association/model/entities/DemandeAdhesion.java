@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity @Audited @Getter @Setter @NoArgsConstructor
@@ -18,6 +19,9 @@ public class DemandeAdhesion extends AuditableEntity
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DEMANDE_ADHESION_ID_GEN")
     @SequenceGenerator(name = "DEMANDE_ADHESION_ID_GEN", sequenceName = "DEMANDE_ADHESION_ID_GEN", allocationSize = 10)
     private Long demandeId;
+
+    @Column(length = 50)
+    private String reference;
 
     @ManyToOne @JoinColumn(name = "ASSO_ID")
     private Association association;
@@ -33,12 +37,16 @@ public class DemandeAdhesion extends AuditableEntity
 
     private LocalDateTime dateSoumission;
     private LocalDateTime dateDecision;
-    private String decideurUserId;
-    @Column(length = 2000) private String motifRefus;
+    @Column(length = 2000)
+    private String motifRefus;
     private Boolean accepteCharte;
     private Boolean accepteRgpd;
 
-    @OneToOne
-    @JoinColumn(name = "ADHESION_ID")
+    @Column(length = 4000)
+    private String message;
+
+    private BigDecimal montantCotisationEstime;
+
+    @OneToOne @JoinColumn(name = "ADHESION_ID")
     private Adhesion adhesionCreee; // renseigné si APPROUVEE
 }
