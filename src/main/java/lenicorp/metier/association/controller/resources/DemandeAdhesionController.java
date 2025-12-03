@@ -16,13 +16,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/demandes-adhesion")
 @RequiredArgsConstructor
-public class DemandeAdhesionController {
-
+public class DemandeAdhesionController
+{
     private final IDemandeAdhesionService service;
-
     // Création d'une demande d'adhésion -> EN_ATTENTE
-    @PostMapping
-    public ReadDemandeAdhesionDTO create(@Valid @RequestBody CreateDemandeAdhesionDTO dto) {
+    // Passe en multipart/form-data pour permettre l'envoi de fichiers via CreateDemandeAdhesionDTO.documents
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ReadDemandeAdhesionDTO create(@Valid @ModelAttribute CreateDemandeAdhesionDTO dto) {
         return service.create(dto);
     }
 

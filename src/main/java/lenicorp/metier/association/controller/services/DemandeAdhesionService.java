@@ -71,6 +71,10 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
         d.setReference("DEM-" + System.currentTimeMillis());
 
         d = repo.save(d);
+
+        // Uploader les documents joints via CreateDemandeAdhesionDTO
+        uploadDemandeDocuments(dto.documents(), d.getDemandeId());
+
         return demandeAdhesionMapper.mapTopDemandeAdhesionReadDTO(d);
     }
 
@@ -88,19 +92,7 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
         ReadDemandeAdhesionDTO read = create(createDemandeDTO);
 
         // 3) Uploader les documents
-        if (adhesionDTO.getDocuments() != null && !adhesionDTO.getDocuments().isEmpty()) {
-            Long demandeId = read.demandeId();
-            for (UploadDocReq doc : adhesionDTO.getDocuments()) {
-                if (doc == null) continue;
-                doc.setObjectTableName("DEMANDE_ADHESION");
-                doc.setObjectId(demandeId);
-                try {
-                    documentService.uploadDocument(doc);
-                } catch (Exception e) {
-                    throw new AppException("Erreur lors de l'upload du document: " + e.getMessage());
-                }
-            }
-        }
+        uploadDemandeDocuments(adhesionDTO.getDocuments(), read.demandeId());
 
         return read;
     }
@@ -205,6 +197,20 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
         String st = d.getStatut() == null ? null : d.getStatut().code;
         if (!Objects.equals(st, expectedCode))
             throw new AppException("Statut attendu: " + expectedCode + ", actuel: " + st);
+    }
+
+    private void uploadDemandeDocuments(List<UploadDocReq> documents, Long demandeId) {
+        if (documents == null || documents.isEmpty()) return;
+        for (UploadDocReq doc : documents) {
+            if (doc == null) continue;
+            doc.setObjectTableName("DEMANDE_ADHESION");
+            doc.setObjectId(demandeId);
+            try {
+                documentService.uploadDocument(doc);
+            } catch (Exception e) {
+                throw new AppException("Erreur lors de l'upload du document: " + e.getMessage());
+            }
+        }
     }
 
 }
