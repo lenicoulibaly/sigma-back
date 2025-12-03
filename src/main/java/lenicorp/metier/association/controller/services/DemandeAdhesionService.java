@@ -1,7 +1,10 @@
 package lenicorp.metier.association.controller.services;
 
 import jakarta.transaction.Transactional;
+import lenicorp.admin.archive.controller.service.IDocumentService;
+import lenicorp.admin.archive.model.dtos.request.UploadDocReq;
 import lenicorp.admin.exceptions.AppException;
+import lenicorp.admin.security.controller.services.specs.IUserService;
 import lenicorp.admin.security.controller.services.specs.IJwtService;
 import lenicorp.admin.types.controller.repositories.TypeRepo;
 import lenicorp.admin.types.model.entities.Type;
@@ -9,13 +12,14 @@ import lenicorp.admin.utilities.StringUtils;
 import lenicorp.metier.association.controller.repositories.AssoRepo;
 import lenicorp.metier.association.controller.repositories.DemandeAdhesionRepo;
 import lenicorp.metier.association.controller.repositories.AdhesionRepo;
-import lenicorp.metier.association.model.dtos.DemandeAdhesionCreateDTO;
-import lenicorp.metier.association.model.dtos.DemandeAdhesionReadDTO;
+import lenicorp.metier.association.model.dtos.AdhesionDTO;
+import lenicorp.admin.security.model.dtos.CreateUserDTO;
+import lenicorp.metier.association.model.dtos.CreateDemandeAdhesionDTO;
+import lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO;
 import lenicorp.metier.association.model.entities.Adhesion;
-import lenicorp.metier.association.model.entities.Association;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
-import lenicorp.metier.association.model.entities.Section;
 import lenicorp.metier.association.model.mappers.DemandeAdhesionMapper;
+import lenicorp.metier.association.model.mappers.AdhesionMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +42,9 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
     private final TypeRepo typeRepo;
     private final IJwtService jwtService;
     private final DemandeAdhesionMapper demandeAdhesionMapper;
+    private final AdhesionMapper adhesionMapper;
+    private final IUserService userService;
+    private final IDocumentService documentService;
 
     // Statut codes (doivent exister dans le référentiel TYPE groupé adéquat)
     private static final String EN_ATTENTE = "EN_ATTENTE";
@@ -54,7 +61,7 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
 
     @Override
     @Transactional
-    public DemandeAdhesionReadDTO create(DemandeAdhesionCreateDTO dto) {
+    public ReadDemandeAdhesionDTO create(CreateDemandeAdhesionDTO dto) {
         if (dto.assoId() == null) throw new AppException("Association requise");
         if (!dto.accepteRgpd()) throw new AppException("Veuillez accepter le RGPD");
         // MapStruct mapping from DTO -> Entity, with current user from jwt
@@ -69,7 +76,38 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
 
     @Override
     @Transactional
-    public DemandeAdhesionReadDTO prendreEnEtude(Long demandeId) {
+    public ReadDemandeAdhesionDTO createUserWithDemandeAdhesion(AdhesionDTO adhesionDTO) {
+        // 1) Créer l'utilisateur avec profil
+        CreateUserDTO createUserDTO = adhesionMapper.mapToCreateUserDto(adhesionDTO);
+        createUserDTO.setProfileCode("PRFL_MBR_ASSO");
+        createUserDTO.setUserProfileAssTypeCode("TITULAIRE");
+        userService.createUserWithProfile(createUserDTO);
+
+        // 2) Créer la demande d'adhésion
+        CreateDemandeAdhesionDTO createDemandeDTO = adhesionMapper.mapToCreateDemandeAdhesionDto(adhesionDTO);
+        ReadDemandeAdhesionDTO read = create(createDemandeDTO);
+
+        // 3) Uploader les documents
+        if (adhesionDTO.getDocuments() != null && !adhesionDTO.getDocuments().isEmpty()) {
+            Long demandeId = read.demandeId();
+            for (UploadDocReq doc : adhesionDTO.getDocuments()) {
+                if (doc == null) continue;
+                doc.setObjectTableName("DEMANDE_ADHESION");
+                doc.setObjectId(demandeId);
+                try {
+                    documentService.uploadDocument(doc);
+                } catch (Exception e) {
+                    throw new AppException("Erreur lors de l'upload du document: " + e.getMessage());
+                }
+            }
+        }
+
+        return read;
+    }
+
+    @Override
+    @Transactional
+    public ReadDemandeAdhesionDTO prendreEnEtude(Long demandeId) {
         DemandeAdhesion d = repo.lockById(demandeId)
                 .orElseThrow(() -> new AppException("Demande introuvable"));
         String st = d.getStatut() == null ? null : d.getStatut().code;
@@ -82,7 +120,7 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
 
     @Override
     @Transactional
-    public DemandeAdhesionReadDTO approuver(Long demandeId) {
+    public ReadDemandeAdhesionDTO approuver(Long demandeId) {
         DemandeAdhesion d = repo.lockById(demandeId)
                 .orElseThrow(() -> new AppException("Demande introuvable"));
         ensureState(d, EN_ETUDE);
@@ -113,7 +151,7 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
 
     @Override
     @Transactional
-    public DemandeAdhesionReadDTO confirmerPaiement(Long demandeId) {
+    public ReadDemandeAdhesionDTO confirmerPaiement(Long demandeId) {
         DemandeAdhesion d = repo.lockById(demandeId)
                 .orElseThrow(() -> new AppException("Demande introuvable"));
         ensureState(d, EN_ATTENTE_PAIEMENT);
@@ -129,7 +167,7 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
 
     @Override
     @Transactional
-    public DemandeAdhesionReadDTO rejeter(Long demandeId, String motifRefus) {
+    public ReadDemandeAdhesionDTO rejeter(Long demandeId, String motifRefus) {
         if (motifRefus == null || motifRefus.trim().isEmpty())
             throw new AppException("Motif de refus obligatoire");
         DemandeAdhesion d = repo.lockById(demandeId)
@@ -144,7 +182,7 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
 
     @Override
     @Transactional
-    public DemandeAdhesionReadDTO annuler(Long demandeId) {
+    public ReadDemandeAdhesionDTO annuler(Long demandeId) {
         DemandeAdhesion d = repo.lockById(demandeId)
                 .orElseThrow(() -> new AppException("Demande introuvable"));
         String st = d.getStatut() == null ? null : d.getStatut().code;
@@ -156,7 +194,7 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
     }
 
     @Override
-    public Page<DemandeAdhesionReadDTO> search(String key, Long assoId, List<String> statutCodes, Pageable pageable) {
+    public Page<ReadDemandeAdhesionDTO> search(String key, Long assoId, List<String> statutCodes, Pageable pageable) {
         key = StringUtils.stripAccentsToUpperCase(key);
         boolean hasStatus = statutCodes != null && !statutCodes.isEmpty();
         Pageable sorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.ASC, "dateSoumission"));

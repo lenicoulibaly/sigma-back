@@ -7,6 +7,8 @@ import lenicorp.admin.archive.model.entities.Document;
 import lenicorp.admin.exceptions.AppException;
 import lenicorp.admin.security.controller.repositories.UserRepo;
 import lenicorp.admin.security.model.entities.AppUser;
+import lenicorp.admin.security.controller.services.specs.IUserService;
+import lenicorp.metier.association.controller.services.IDemandeAdhesionService;
 import lenicorp.admin.utilities.SelectOption;
 import lenicorp.admin.utilities.StringUtils;
 import lenicorp.metier.association.controller.repositories.AdhesionRepo;
@@ -21,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +36,8 @@ public class AdhesionService implements IAdhesionService
     private final AdhesionRepo adhesionRepo;
     private final UserRepo userRepo;
     private final DocumentRepository docRepo;
+    private final IUserService userService; // may still be used elsewhere in future methods
+    private final IDemandeAdhesionService demandeAdhesionService; // kept for other operations
 
     @Override
     @Transactional
@@ -83,6 +88,8 @@ public class AdhesionService implements IAdhesionService
 
         return adhesion;
     }
+
+    // Méthode migrée dans DemandeAdhesionService
 
     @Override
     @Transactional

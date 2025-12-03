@@ -2,11 +2,9 @@ package lenicorp.metier.association.model.mappers;
 
 import lenicorp.admin.security.controller.services.specs.IJwtService;
 import lenicorp.admin.security.model.entities.AppUser;
-import lenicorp.metier.association.model.dtos.DemandeAdhesionCreateDTO;
-import lenicorp.metier.association.model.dtos.DemandeAdhesionReadDTO;
-import lenicorp.metier.association.model.entities.Association;
+import lenicorp.metier.association.model.dtos.CreateDemandeAdhesionDTO;
+import lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
-import lenicorp.metier.association.model.entities.Section;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -21,7 +19,7 @@ public interface DemandeAdhesionMapper {
     @Mapping(target = "user", expression = "java(jwtService.getCurrentUser())")
     @Mapping(target = "dateSoumission", expression = "java(java.time.LocalDateTime.now())")
     // statut & reference & dateDecision & adhesionCreee managed in service
-    DemandeAdhesion mapTopDemandeAdhesion(DemandeAdhesionCreateDTO dto, @Context IJwtService jwtService);
+    DemandeAdhesion mapTopDemandeAdhesion(CreateDemandeAdhesionDTO dto, @Context IJwtService jwtService);
 
     // Entity -> Record(Read)
     @Mapping(target = "assoId", source = "association.assoId")
@@ -33,7 +31,7 @@ public interface DemandeAdhesionMapper {
     @Mapping(target = "montantDu", source = "montantCotisationEstime")
     @Mapping(target = "adhesionIdCreee", source = "adhesionCreee.adhesionId")
     @Mapping(target = "decideurFullName", expression = "java(null)")
-    DemandeAdhesionReadDTO mapTopDemandeAdhesionReadDTO(DemandeAdhesion entity);
+    ReadDemandeAdhesionDTO mapTopDemandeAdhesionReadDTO(DemandeAdhesion entity);
 
     // Helper
     default String combineUserName(AppUser u) {

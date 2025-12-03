@@ -1,6 +1,7 @@
 package lenicorp.metier.association.model.dtos;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -69,6 +70,12 @@ public class AdhesionDTO
     private String strName;
     private List<UploadDocReq> documents;
     private UserProfileAssoDTO profileDto;
+
+    // Confirmations d'acceptation (alignées avec CreateDemandeAdhesionDTO)
+    @AssertTrue(message = "Vous devez accepter le RGPD")
+    private boolean accepteRgpd;
+    @AssertTrue(message = "Vous devez accepter la charte d'adhésion")
+    private boolean accepteCharte;
 
     public AdhesionDTO(Long userId, Long sectionId, Long assoId, Long adhesionId, String sectionName, String assoName) {
         this.userId = userId;

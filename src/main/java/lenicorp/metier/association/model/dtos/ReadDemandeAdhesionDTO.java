@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Builder
-public record DemandeAdhesionReadDTO(
+public record ReadDemandeAdhesionDTO(
         Long demandeId,
         String reference,
         Long assoId,

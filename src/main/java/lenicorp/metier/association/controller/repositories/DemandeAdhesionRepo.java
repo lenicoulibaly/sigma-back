@@ -1,6 +1,6 @@
 package lenicorp.metier.association.controller.repositories;
 
-import lenicorp.metier.association.model.dtos.DemandeAdhesionReadDTO;
+import lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +20,7 @@ public interface DemandeAdhesionRepo extends JpaRepository<DemandeAdhesion, Long
     Optional<DemandeAdhesion> lockById(@Param("id") Long id);
 
     @Query(value = """
-            SELECT new lenicorp.metier.association.model.dtos.DemandeAdhesionReadDTO(
+            SELECT new lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO(
                 d.demandeId,
                 d.reference,
                 d.association.assoId,
@@ -65,7 +65,7 @@ public interface DemandeAdhesionRepo extends JpaRepository<DemandeAdhesion, Long
                 :hasStatusFilter = false OR d.statut.code IN (:statutCodes)
               )
             """)
-    Page<DemandeAdhesionReadDTO> search(
+    Page<ReadDemandeAdhesionDTO> search(
             @Param("key") String key,
             @Param("assoId") Long assoId,
             @Param("statutCodes") List<String> statutCodes,
