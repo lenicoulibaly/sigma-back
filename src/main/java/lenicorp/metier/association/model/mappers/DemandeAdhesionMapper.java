@@ -16,7 +16,7 @@ public interface DemandeAdhesionMapper {
     // Record(Create) -> Entity
     @Mapping(target = "association", expression = "java(dto.assoId() == null ? null : new Association(dto.assoId()))")
     @Mapping(target = "section", expression = "java(dto.sectionId() == null ? null : new Section(dto.sectionId()))")
-    @Mapping(target = "user", expression = "java(jwtService.getCurrentUser())")
+    @Mapping(target = "demandeur", expression = "java(jwtService.getCurrentUser())")
     @Mapping(target = "dateSoumission", expression = "java(java.time.LocalDateTime.now())")
     // statut & reference & dateDecision & adhesionCreee managed in service
     DemandeAdhesion mapTopDemandeAdhesion(CreateDemandeAdhesionDTO dto, @Context IJwtService jwtService);
@@ -24,8 +24,8 @@ public interface DemandeAdhesionMapper {
     // Entity -> Record(Read)
     @Mapping(target = "assoId", source = "association.assoId")
     @Mapping(target = "sectionId", source = "section.sectionId")
-    @Mapping(target = "userId", source = "user.userId")
-    @Mapping(target = "userFullName", expression = "java(combineUserName(entity.getUser()))")
+    @Mapping(target = "userId", source = "demandeur.userId")
+    @Mapping(target = "userFullName", expression = "java(combineUserName(entity.getDemandeur()))")
     @Mapping(target = "statutCode", source = "statut.code")
     @Mapping(target = "statutName", source = "statut.name")
     @Mapping(target = "montantDu", source = "montantCotisationEstime")

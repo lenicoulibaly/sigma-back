@@ -143,7 +143,7 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
 
         // Pas de paiement requis -> créer l'adhésion
         Adhesion adh = new Adhesion(null, d.getAssociation(), d.getSection(), true,
-                d.getUser() == null ? null : String.valueOf(d.getUser().getUserId()));
+                d.getDemandeur() == null ? null : String.valueOf(d.getDemandeur().getUserId()));
         adh = adhesionRepo.save(adh);
         d.setAdhesionCreee(adh);
         d.setStatut(type(APPROUVEE));
@@ -158,7 +158,7 @@ public class DemandeAdhesionService implements IDemandeAdhesionService {
                 .orElseThrow(() -> new AppException("Demande introuvable"));
         ensureState(d, EN_ATTENTE_PAIEMENT);
         Adhesion adh = new Adhesion(null, d.getAssociation(), d.getSection(), true,
-                d.getUser() == null ? null : String.valueOf(d.getUser().getUserId()));
+                d.getDemandeur() == null ? null : String.valueOf(d.getDemandeur().getUserId()));
         adh = adhesionRepo.save(adh);
         d.setAdhesionCreee(adh);
         d.setStatut(type(APPROUVEE));

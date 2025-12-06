@@ -1,4 +1,4 @@
-package lenicorp.metier.association.model.entities;
+package lenicorp.admin.workflowengine;
 
 import jakarta.persistence.*;
 import lenicorp.admin.security.audit.AuditableEntity;
@@ -9,11 +9,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity @Audited @Getter @Setter @NoArgsConstructor
-public class DemandeAdhesion extends AuditableEntity
+public class Demande extends AuditableEntity
 {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DEMANDE_ADHESION_ID_GEN")
@@ -23,11 +22,9 @@ public class DemandeAdhesion extends AuditableEntity
     @Column(length = 50)
     private String reference;
 
-    @ManyToOne @JoinColumn(name = "ASSO_ID")
-    private Association association;
+    @ManyToOne @JoinColumn(name = "TYPE_DMD_CODE")
+    private Type typeDemande;
 
-    @ManyToOne @JoinColumn(name = "SECTION_ID")
-    private Section section; // nullable
 
     @ManyToOne @JoinColumn(name = "USER_ID")
     private AppUser demandeur;
@@ -39,15 +36,7 @@ public class DemandeAdhesion extends AuditableEntity
     private LocalDateTime dateDecision;
     @Column(length = 2000)
     private String motifRefus;
-    private Boolean accepteCharte;
-    private Boolean accepteRgpd;
-    private Boolean accepteStatutsReglements;
 
     @Column(length = 4000)
     private String message;
-
-    private BigDecimal montantCotisationEstime;
-
-    @OneToOne @JoinColumn(name = "ADHESION_ID")
-    private Adhesion adhesionCreee; // renseigné si APPROUVEE
 }
