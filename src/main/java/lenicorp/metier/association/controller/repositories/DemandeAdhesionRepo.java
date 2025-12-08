@@ -25,8 +25,8 @@ public interface DemandeAdhesionRepo extends JpaRepository<DemandeAdhesion, Long
                 d.reference,
                 d.association.assoId,
                 d.section.sectionId,
-                d.user.userId,
-                CONCAT(COALESCE(d.user.firstName,''),' ',COALESCE(d.user.lastName,'')),
+                d.demandeur.userId,
+                CONCAT(COALESCE(d.demandeur.firstName,''),' ',COALESCE(d.demandeur.lastName,'')),
                 d.statut.code,
                 d.statut.name,
                 d.message,
@@ -41,9 +41,9 @@ public interface DemandeAdhesionRepo extends JpaRepository<DemandeAdhesion, Long
               AND (
                 :key IS NULL OR :key = '' OR
                 UPPER(FUNCTION('unaccent', COALESCE(d.reference, ''))) LIKE CONCAT('%', :key, '%') OR
-                UPPER(FUNCTION('unaccent', COALESCE(d.user.firstName, ''))) LIKE CONCAT('%', :key, '%') OR
-                UPPER(FUNCTION('unaccent', COALESCE(d.user.lastName, ''))) LIKE CONCAT('%', :key, '%') OR
-                UPPER(FUNCTION('unaccent', COALESCE(d.user.email, ''))) LIKE CONCAT('%', :key, '%')
+                UPPER(FUNCTION('unaccent', COALESCE(d.demandeur.firstName, ''))) LIKE CONCAT('%', :key, '%') OR
+                UPPER(FUNCTION('unaccent', COALESCE(d.demandeur.lastName, ''))) LIKE CONCAT('%', :key, '%') OR
+                UPPER(FUNCTION('unaccent', COALESCE(d.demandeur.email, ''))) LIKE CONCAT('%', :key, '%')
               )
               AND (
                 :hasStatusFilter = false OR d.statut.code IN (:statutCodes)
@@ -57,9 +57,9 @@ public interface DemandeAdhesionRepo extends JpaRepository<DemandeAdhesion, Long
               AND (
                 :key IS NULL OR :key = '' OR
                 UPPER(FUNCTION('unaccent', COALESCE(d.reference, ''))) LIKE CONCAT('%', :key, '%') OR
-                UPPER(FUNCTION('unaccent', COALESCE(d.user.firstName, ''))) LIKE CONCAT('%', :key, '%') OR
-                UPPER(FUNCTION('unaccent', COALESCE(d.user.lastName, ''))) LIKE CONCAT('%', :key, '%') OR
-                UPPER(FUNCTION('unaccent', COALESCE(d.user.email, ''))) LIKE CONCAT('%', :key, '%')
+                UPPER(FUNCTION('unaccent', COALESCE(d.demandeur.firstName, ''))) LIKE CONCAT('%', :key, '%') OR
+                UPPER(FUNCTION('unaccent', COALESCE(d.demandeur.lastName, ''))) LIKE CONCAT('%', :key, '%') OR
+                UPPER(FUNCTION('unaccent', COALESCE(d.demandeur.email, ''))) LIKE CONCAT('%', :key, '%')
               )
               AND (
                 :hasStatusFilter = false OR d.statut.code IN (:statutCodes)

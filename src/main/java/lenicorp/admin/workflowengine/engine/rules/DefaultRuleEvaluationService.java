@@ -105,7 +105,9 @@ public class DefaultRuleEvaluationService implements RuleEvaluationService {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private boolean compare(Object left, String op, Object right) {
+    private boolean compare(Object left, String op, Object right)
+    {
+        if(op == null  || op.isBlank() || op.equals("=")) op = "==";
         switch (op) {
             case "==": return Objects.equals(left, right);
             case "!=": return !Objects.equals(left, right);
