@@ -1,12 +1,15 @@
 package lenicorp.admin.workflowengine.admin.service;
 
 import lenicorp.admin.workflowengine.admin.dto.WorkflowAdminDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface AdminWorkflowService {
     List<WorkflowAdminDTO> listAll();
+    Page<WorkflowAdminDTO> search(String key, Boolean active, PageRequest pageRequest);
     ResponseEntity<WorkflowAdminDTO> get(Long id);
     WorkflowAdminDTO create(WorkflowAdminDTO dto);
     ResponseEntity<WorkflowAdminDTO> update(Long id, WorkflowAdminDTO dto);

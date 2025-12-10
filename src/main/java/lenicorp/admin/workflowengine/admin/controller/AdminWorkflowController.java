@@ -3,6 +3,8 @@ package lenicorp.admin.workflowengine.admin.controller;
 import lenicorp.admin.workflowengine.admin.dto.WorkflowAdminDTO;
 import lenicorp.admin.workflowengine.admin.service.AdminWorkflowService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,16 @@ public class AdminWorkflowController {
     @GetMapping
     public List<WorkflowAdminDTO> listAll() {
         return service.listAll();
+    }
+
+    @GetMapping("/search")
+    public Page<WorkflowAdminDTO> search(
+            @RequestParam(value = "key", required = false) String key,
+            @RequestParam(value = "active", required = false) Boolean active,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        return service.search(key, active, PageRequest.of(page, size));
     }
 
     @GetMapping("/{id}")
