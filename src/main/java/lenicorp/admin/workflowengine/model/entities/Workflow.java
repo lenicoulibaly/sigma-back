@@ -5,6 +5,8 @@ import lenicorp.admin.types.model.entities.Type;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "workflow")
@@ -29,4 +31,9 @@ public class Workflow {
     private Type targetTableName;
 
     private Boolean active = true;
+
+    // Etapes/statuts du workflow
+    @OneToMany(mappedBy = "workflow", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("ordre ASC")
+    private List<WorkflowStatus> statuses = new ArrayList<>();
 }

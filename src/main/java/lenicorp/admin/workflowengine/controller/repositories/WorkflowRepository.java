@@ -1,5 +1,6 @@
-package lenicorp.admin.workflowengine.model.repositories;
+package lenicorp.admin.workflowengine.controller.repositories;
 
+import lenicorp.admin.workflowengine.model.dtos.WorkflowDTO;
 import lenicorp.admin.workflowengine.model.entities.Workflow;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +17,9 @@ public interface WorkflowRepository extends JpaRepository<Workflow, Long> {
     List<Workflow> findByTargetTableName_CodeAndActiveTrue(String targetTableNameCode);
 
     @Query(value = """
-            SELECT w FROM Workflow w 
+            SELECT new lenicorp.admin.workflowengine.model.dtos.WorkflowDTO(
+                w.id, w.code, w.libelle, w.type.code, w.targetTableName.code, w.active
+            ) FROM Workflow w 
             WHERE (
                 UPPER(FUNCTION('unaccent', COALESCE(w.code, ''))) LIKE :key
                 OR UPPER(FUNCTION('unaccent', COALESCE(w.libelle, ''))) LIKE :key
@@ -35,5 +38,5 @@ public interface WorkflowRepository extends JpaRepository<Workflow, Long> {
             )
             AND (:active IS NULL OR w.active = :active)
             """)
-    Page<Workflow> search(@Param("key") String key, @Param("active") Boolean active, Pageable pageable);
+    Page<WorkflowDTO> search(@Param("key") String key, @Param("active") Boolean active, Pageable pageable);
 }
