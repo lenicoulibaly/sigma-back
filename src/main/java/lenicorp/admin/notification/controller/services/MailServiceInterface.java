@@ -28,6 +28,17 @@ public interface MailServiceInterface
     CompletableFuture<MailResponse> envoyerEmailReinitialisation(String destinataire, String nomDestinataire, String lienReset);
 
     /**
+     * Envoie un email de notification d'adhésion approuvée.
+     *
+     * @param destinataire    L'adresse email du destinataire.
+     * @param nomDestinataire Le nom du destinataire.
+     * @param nomAssociation  Le nom de l'association.
+     * @param lienConnexion   Le lien vers l'espace membre.
+     * @return Un CompletableFuture de MailResponse décrivant le résultat de l'envoi.
+     */
+    CompletableFuture<MailResponse> envoyerEmailAdhesionApprouvee(String destinataire, String nomDestinataire, String nomAssociation, String lienConnexion);
+
+    /**
      * Envoie un email avec le contenu spécifié.
      *
      * @param mailRequest Les informations sur l'email à envoyer.

@@ -74,6 +74,27 @@ public class MailService implements MailServiceInterface
         return sendMailAsync(mailRequest);
     }
 
+    @Override
+    public CompletableFuture<MailResponse> envoyerEmailAdhesionApprouvee(String destinataire, String nomDestinataire, String nomAssociation, String lienConnexion)
+    {
+        String sujet = "Félicitations ! Votre demande d'adhésion a été approuvée";
+
+        // Charger le fichier HTML de notification d'adhésion approuvée
+        String corpsHtml = chargerTemplateHtml("templates/emails/demande-adhesion-approuvee.html")
+                .replace("${nomDestinataire}", nomDestinataire)
+                .replace("${nomAssociation}", nomAssociation)
+                .replace("${lienConnexion}", lienConnexion);
+
+        MailRequest mailRequest = MailRequest.builder()
+                .to(destinataire)
+                .subject(sujet)
+                .content(corpsHtml)
+                .isHtml(true)
+                .build();
+
+        return sendMailAsync(mailRequest);
+    }
+
     @Override @Transactional
     public CompletableFuture<MailResponse> sendMailAsync(MailRequest mailRequest) 
     {
