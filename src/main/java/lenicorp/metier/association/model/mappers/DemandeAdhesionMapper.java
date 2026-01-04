@@ -5,11 +5,7 @@ import lenicorp.admin.security.model.entities.AppUser;
 import lenicorp.metier.association.model.dtos.CreateDemandeAdhesionDTO;
 import lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
-import org.mapstruct.Context;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-
+import org.mapstruct.*;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface DemandeAdhesionMapper {
 
@@ -32,6 +28,47 @@ public interface DemandeAdhesionMapper {
     @Mapping(target = "adhesionIdCreee", source = "adhesionCreee.adhesionId")
     @Mapping(target = "decideurFullName", expression = "java(null)")
     ReadDemandeAdhesionDTO mapTopDemandeAdhesionReadDTO(DemandeAdhesion entity);
+
+    @Mapping(target = "association", source = "associationId", qualifiedByName = "idToAssociation")
+    @Mapping(target = "section", source = "sectionId", qualifiedByName = "idToSection")
+    @Mapping(target = "demandeur", source = "demandeurId", qualifiedByName = "idToUser")
+    DemandeAdhesion toEntity(lenicorp.metier.association.model.dtos.DemandeAdhesionDTO dto);
+
+    @Mapping(target = "associationId", source = "association.assoId")
+    @Mapping(target = "associationNom", source = "association.assoName")
+    @Mapping(target = "sectionId", source = "section.sectionId")
+    @Mapping(target = "sectionNom", source = "section.sectionName")
+    @Mapping(target = "demandeurId", source = "demandeur.userId")
+    @Mapping(target = "demandeurNom", expression = "java(combineUserName(entity.getDemandeur()))")
+    @Mapping(target = "statutCode", source = "statut.code")
+    @Mapping(target = "statutNom", source = "statut.name")
+    lenicorp.metier.association.model.dtos.DemandeAdhesionDTO toDto(DemandeAdhesion entity);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "demandeId", ignore = true)
+    @Mapping(target = "statut", ignore = true)
+    @Mapping(target = "association", ignore = true)
+    @Mapping(target = "section", ignore = true)
+    @Mapping(target = "demandeur", ignore = true)
+    void updateEntity(lenicorp.metier.association.model.dtos.DemandeAdhesionDTO dto, @MappingTarget DemandeAdhesion entity);
+
+    @Named("idToAssociation")
+    default lenicorp.metier.association.model.entities.Association idToAssociation(Long id) {
+        if (id == null) return null;
+        return new lenicorp.metier.association.model.entities.Association(id);
+    }
+
+    @Named("idToSection")
+    default lenicorp.metier.association.model.entities.Section idToSection(Long id) {
+        if (id == null) return null;
+        return new lenicorp.metier.association.model.entities.Section(id);
+    }
+
+    @Named("idToUser")
+    default lenicorp.admin.security.model.entities.AppUser idToUser(Long id) {
+        if (id == null) return null;
+        return new lenicorp.admin.security.model.entities.AppUser(id);
+    }
 
     // Helper
     default String combineUserName(AppUser u) {
