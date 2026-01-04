@@ -25,20 +25,21 @@ public class AppUserDetailsService implements UserDetailsService
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {
-        System.out.println("Loading user by username: " + username);
-
         UserDTO user = userRepo.findMinimalByUsername(username);
 
-        if (user == null) {
+        if (user == null)
+        {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
 
         // Check if user is activated and not blocked
-        if (!user.isActivated()) {
+        if (!user.isActivated())
+        {
             throw new UsernameNotFoundException("User account is not activated");
         }
 
-        if (!user.isNotBlocked()) {
+        if (!user.isNotBlocked())
+        {
             throw new UsernameNotFoundException("User account is blocked");
         }
 

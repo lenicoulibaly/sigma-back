@@ -56,7 +56,20 @@ public class TypeService implements ITypeService
 
         Type type = typeMapper.mapToType(dto);
         type = typeRepo.save(type);
-        return typeMapper.mapToDto(type);
+        if(dto.getParentTypeCodes() != null && !dto.getParentTypeCodes().isEmpty())
+        {
+            for (String parentCode : dto.getParentTypeCodes())
+            {
+                if (!typeRepo.existsByCodeAndGroupCode(parentCode, dto.getGroupCode()))
+                {
+                    throw new AppException("Le parent " + parentCode + " n'existe pas ou n'appartient pas au même groupe.");
+                }
+                tmRepo.save(new TypeMapping(null, new Type(parentCode), type));
+            }
+        }
+        TypeDTO result = typeMapper.mapToDto(type);
+        result.setParentTypeCodes(typeRepo.getParentTypeCodes(type.code));
+        return result;
     }
 
     @Override
@@ -70,14 +83,41 @@ public class TypeService implements ITypeService
         existingType = typeMapper.mapToType(dto, existingType);
         if (dto.getGroupCode() != null) existingType.typeGroup = new TypeGroup(dto.getGroupCode());
         existingType = typeRepo.save(existingType);
-        return typeMapper.mapToDto(existingType);
+
+        if (dto.getParentTypeCodes() != null)
+        {
+            List<String> toRemove = tmRepo.findParentCodesToRemove(existingType.code, dto.getParentTypeCodes());
+            if (!toRemove.isEmpty()) tmRepo.removeParents(existingType.code, toRemove);
+
+            List<String> toAdd = tmRepo.findParentCodesToAdd(existingType.code, dto.getParentTypeCodes());
+            for (String parentCode : toAdd)
+            {
+                if (!typeRepo.existsByCodeAndGroupCode(parentCode, dto.getGroupCode()))
+                {
+                    throw new AppException("Le parent " + parentCode + " n'existe pas ou n'appartient pas au même groupe.");
+                }
+                if (this.parentHasDistantSousType(existingType.code, parentCode))
+                {
+                    throw new AppException("Le type " + parentCode + " est déjà un descendant du type " + existingType.code + ". Association impossible.");
+                }
+                tmRepo.save(new TypeMapping(null, new Type(parentCode), existingType));
+            }
+        }
+
+        TypeDTO result = typeMapper.mapToDto(existingType);
+        result.setParentTypeCodes(typeRepo.getParentTypeCodes(existingType.code));
+        return result;
     }
 
     @Override
     public Page<TypeDTO> searchTypes(String key, List<String> groupCodes, PageRequest pageRequest)
     {
         boolean hasGroupCodeFilter = groupCodes != null && !groupCodes.isEmpty();
-        return typeRepo.searchTypes(key, groupCodes, hasGroupCodeFilter, pageRequest);
+        Page<TypeDTO> result = typeRepo.searchTypes(key, groupCodes, hasGroupCodeFilter, pageRequest);
+        result.getContent().forEach(dto -> {
+            dto.setParentTypeCodes(typeRepo.getParentTypeCodes(dto.getCode()));
+        });
+        return result;
     }
 
     @Override
@@ -131,7 +171,9 @@ public class TypeService implements ITypeService
     @Override
     public List<TypeDTO> getDirectSousTypes(String parentCode)
     {
-        return typeRepo.findDirectSousTypes(parentCode);
+        List<TypeDTO> result = typeRepo.findDirectSousTypes(parentCode);
+        result.forEach(dto -> dto.setParentTypeCodes(typeRepo.getParentTypeCodes(dto.getCode())));
+        return result;
     }
 
     @Override
@@ -173,14 +215,27 @@ public class TypeService implements ITypeService
     @Override
     public List<TypeDTO> getPossibleSousTypes(String parentCode)
     {
-        return typeRepo.findByTypeGroup(typeGroupRepo.findGroupCodeByTypeCode(parentCode)).stream()
+        List<TypeDTO> result = typeRepo.findByTypeGroup(typeGroupRepo.findGroupCodeByTypeCode(parentCode)).stream()
                 .filter(t -> !this.parentHasDistantSousType(t.getCode(), parentCode) && !t.getCode().equals(parentCode))
                 .collect(Collectors.toList());
+        result.forEach(dto -> dto.setParentTypeCodes(typeRepo.getParentTypeCodes(dto.getCode())));
+        return result;
+    }
+
+    @Override
+    public List<TypeDTO> getPossibleParents(String typeCode)
+    {
+        List<TypeDTO> result = typeRepo.findByTypeGroup(typeGroupRepo.findGroupCodeByTypeCode(typeCode)).stream()
+                .filter(t -> !this.parentHasDistantSousType(typeCode, t.getCode()) && !t.getCode().equals(typeCode))
+                .collect(Collectors.toList());
+        result.forEach(dto -> dto.setParentTypeCodes(typeRepo.getParentTypeCodes(dto.getCode())));
+        return result;
     }
 
     @Override
     public List<TypeDTO> getTypesByGroupCode(String groupCode)
     {
+        List<TypeDTO> result;
         if ("STR".equals(groupCode)) //Si le groupCode est STR, il ne faut retourner que les types que l'utilisateur connecté est en capacité de voir
         {
             Long userProfileStrId = jwtService.getCurrentUserProfileStrId();
@@ -190,11 +245,14 @@ public class TypeService implements ITypeService
                 if (structure != null)
                 {
                     String typeCode = structure.getStrTypeCode();
-                    return getPossibleSousTypes(typeCode);
+                    result = getPossibleSousTypes(typeCode);
+                    return result;
                 }
             }
         }
-        return typeRepo.findByGroupCode(groupCode);
+        result = typeRepo.findByGroupCode(groupCode);
+        result.forEach(dto -> dto.setParentTypeCodes(typeRepo.getParentTypeCodes(dto.getCode())));
+        return result;
     }
 
     @Override

@@ -92,6 +92,12 @@ public class TypeController
         return typeService.getPossibleSousTypes(parentCode);
     }
 
+    @GetMapping("/possible-parents")
+    public List<TypeDTO> getPossibleParents(@RequestParam("typeCode") String typeCode)
+    {
+        return typeService.getPossibleParents(typeCode);
+    }
+
     @GetMapping("/by-group/{groupCode}")
     public List<TypeDTO> getTypesByGroupCode(@PathVariable("groupCode") String groupCode)
     {

@@ -29,4 +29,11 @@ public interface IJwtService
      * @return the raw JWT token, or null if no token is present
      */
     String getCurrentToken();
+
+    /**
+     * Checks if the current user has the specified privilege.
+     * @param privilegeCode the code of the privilege to check
+     * @return true if the user has the privilege, false otherwise
+     */
+    boolean hasPrivilege(String privilegeCode);
 }

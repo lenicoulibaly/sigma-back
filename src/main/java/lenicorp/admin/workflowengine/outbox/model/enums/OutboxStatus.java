@@ -1,4 +1,4 @@
-package lenicorp.admin.workflowengine.outbox.model;
+package lenicorp.admin.workflowengine.outbox.model.enums;
 
 public enum OutboxStatus {
     NEW,

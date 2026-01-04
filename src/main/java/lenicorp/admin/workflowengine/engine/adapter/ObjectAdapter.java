@@ -11,6 +11,8 @@ public interface ObjectAdapter<T> {
 
     Map<String, Object> toRuleMap(T obj);
 
+    T load(String id);
+
     String getId(T obj);
 
     default void save(T obj) { /* optional no-op */ }

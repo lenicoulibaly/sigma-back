@@ -54,7 +54,7 @@ public class SpringJwtService implements IJwtService
         claims.put("firstName", user.getFirstName());
         claims.put("lastName", user.getLastName());
         claims.put("userStrId", strId);
-        claims.put("groups", authorities);
+        claims.put("authorities", authorities);
 
         if (userProfile != null)
         {
@@ -171,6 +171,17 @@ public class SpringJwtService implements IJwtService
             return (String) authentication.getDetails();
         }
         return null;
+    }
+
+    @Override
+    public boolean hasPrivilege(String privilegeCode)
+    {
+        if (privilegeCode == null || privilegeCode.isBlank()) return true;
+        Object groupsClaim = getClaimFromToken("authorities");
+        if (groupsClaim instanceof Collection<?> authorities) {
+            return authorities.contains(privilegeCode);
+        }
+        return false;
     }
 
     // Additional methods for token validation and extraction

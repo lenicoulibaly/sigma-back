@@ -1,4 +1,4 @@
-package lenicorp.admin.workflowengine.outbox.payload;
+package lenicorp.admin.workflowengine.outbox.model.payload;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

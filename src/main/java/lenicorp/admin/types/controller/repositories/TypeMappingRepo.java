@@ -77,4 +77,21 @@ public interface TypeMappingRepo extends JpaRepository<TypeMapping, Long> {
     delete from TypeMapping tm where tm.parent.code = ?1 and tm.child.code in ?2
     """)
     void removeSousTypes(@NotNull(message = "Le code est obligatoire") @NotBlank(message = "Le code est obligatoire") String code, List<String> sousTypeCodesToRemove);
+
+    @Modifying
+    @Query("""
+    delete from TypeMapping tm where tm.child.code = ?1 and tm.parent.code in ?2
+    """)
+    void removeParents(@NotNull(message = "Le code est obligatoire") @NotBlank(message = "Le code est obligatoire") String childCode, List<String> parentTypeCodesToRemove);
+
+    @Query("""
+    select distinct t.code from TypeMapping tm join tm.parent t where tm.child.code = ?1 and t.code not in ?2
+    """)
+    List<String> findParentCodesToRemove(String childCode, List<String> inputParentCodes);
+
+    @Query("""
+    select t.code from Type t where t.code in ?2 and 
+    not exists (select tm from TypeMapping tm where tm.child.code = ?1 and tm.parent.code = t.code)
+    """)
+    List<String> findParentCodesToAdd(String childCode, List<String> inputParentCodes);
 }

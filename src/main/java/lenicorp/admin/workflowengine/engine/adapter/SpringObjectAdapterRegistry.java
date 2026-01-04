@@ -36,4 +36,22 @@ public class SpringObjectAdapterRegistry implements ObjectAdapterRegistry {
         if (instance == null) throw new IllegalArgumentException("instance is null");
         return adapterFor(instance.getClass());
     }
+
+    @Override
+    public ObjectAdapter<?> adapterFor(String targetTypeCode) {
+        if (targetTypeCode == null) throw new IllegalArgumentException("targetTypeCode is null");
+        for (ObjectAdapter<?> adapter : byType.values()) {
+            if (targetTypeCode.equalsIgnoreCase(adapter.targetType().getSimpleName())) {
+                return adapter;
+            }
+        }
+        throw new IllegalArgumentException("No ObjectAdapter registered for target type code " + targetTypeCode);
+    }
+
+    @Override
+    public List<String> getAvailableTargetTypes() {
+        return byType.keySet().stream()
+                .map(Class::getSimpleName)
+                .toList();
+    }
 }

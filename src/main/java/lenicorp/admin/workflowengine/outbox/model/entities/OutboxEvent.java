@@ -1,6 +1,7 @@
-package lenicorp.admin.workflowengine.outbox.model;
+package lenicorp.admin.workflowengine.outbox.model.entities;
 
 import jakarta.persistence.*;
+import lenicorp.admin.workflowengine.outbox.model.enums.OutboxStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,11 +21,9 @@ public class OutboxEvent {
     @Column(nullable = false, length = 100)
     private String eventType; // e.g., TransitionApplied
 
-    @Lob
     @Column(nullable = false, columnDefinition = "TEXT")
     private String payload; // JSON serialized event with actions
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String headers; // optional JSON headers
 
@@ -37,7 +36,6 @@ public class OutboxEvent {
 
     private Instant nextAttemptAt; // null means ready now
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String errorMessage;
 

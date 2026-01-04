@@ -65,4 +65,5 @@ public class TypeDTO
 
     private List<TypeDTO> sousTypes = new ArrayList<>();
     private List<String> sousTypeCodes = new ArrayList<>();
+    private List<String> parentTypeCodes = new ArrayList<>();
 }

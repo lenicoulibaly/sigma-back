@@ -1,4 +1,4 @@
-package lenicorp.admin.workflowengine.outbox.model;
+package lenicorp.admin.workflowengine.outbox.model.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,10 +22,12 @@ public class OutboxActionLog {
     @Column(name = "dedup_key", nullable = false, unique = true, length = 512)
     private String dedupKey;
 
+    @Column
+    private String name;
+
     @Column(nullable = false, length = 20)
     private String status; // RESERVED | SUCCESS | FAILED
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String lastError;
 

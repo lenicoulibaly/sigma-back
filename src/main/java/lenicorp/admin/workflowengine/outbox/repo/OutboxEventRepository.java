@@ -1,7 +1,7 @@
 package lenicorp.admin.workflowengine.outbox.repo;
 
-import lenicorp.admin.workflowengine.outbox.model.OutboxEvent;
-import lenicorp.admin.workflowengine.outbox.model.OutboxStatus;
+import lenicorp.admin.workflowengine.outbox.model.entities.OutboxEvent;
+import lenicorp.admin.workflowengine.outbox.model.enums.OutboxStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

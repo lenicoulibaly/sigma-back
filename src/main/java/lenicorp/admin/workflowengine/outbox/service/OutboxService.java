@@ -2,9 +2,9 @@ package lenicorp.admin.workflowengine.outbox.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lenicorp.admin.workflowengine.outbox.model.OutboxEvent;
-import lenicorp.admin.workflowengine.outbox.model.OutboxStatus;
-import lenicorp.admin.workflowengine.outbox.payload.TransitionAppliedPayload;
+import lenicorp.admin.workflowengine.outbox.model.entities.OutboxEvent;
+import lenicorp.admin.workflowengine.outbox.model.enums.OutboxStatus;
+import lenicorp.admin.workflowengine.outbox.model.payload.TransitionAppliedPayload;
 import lenicorp.admin.workflowengine.outbox.repo.OutboxEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
