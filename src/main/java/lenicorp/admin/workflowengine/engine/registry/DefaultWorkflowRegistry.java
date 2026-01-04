@@ -1,7 +1,7 @@
 package lenicorp.admin.workflowengine.engine.registry;
 
 import lenicorp.admin.workflowengine.model.entities.Workflow;
-import lenicorp.admin.workflowengine.model.repositories.WorkflowRepository;
+import lenicorp.admin.workflowengine.controller.repositories.WorkflowRepository;
 import org.springframework.stereotype.Component;
 
 @Component

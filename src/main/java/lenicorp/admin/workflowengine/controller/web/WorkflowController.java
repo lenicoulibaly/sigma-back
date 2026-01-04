@@ -1,4 +1,4 @@
-package lenicorp.admin.workflowengine.admin.controller;
+package lenicorp.admin.workflowengine.controller.web;
 
 import lenicorp.admin.workflowengine.execution.service.WorkflowExecutionService;
 import lenicorp.admin.workflowengine.model.dtos.WorkflowDTO;

@@ -28,5 +28,7 @@ public interface IAdhesionService
 
     Optional<Adhesion> findByEmailAndAsso(String email, Long assoId);
 
+    void createAdhesionFromDemande(Long demandeId);
+
     Page<ReadDocDTO> searchObjectDocs(Long objectId, String key, Pageable pageable);
 }

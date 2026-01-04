@@ -1,4 +1,3 @@
-package lenicorp.admin.workflowengine.admin.service.impl;
 package lenicorp.admin.workflowengine.controller.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -12,11 +12,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/transition-rules")
 @RequiredArgsConstructor
-public class AdminTransitionRuleController {
+public class WorkflowTransitionRuleController
+{
     private final AdminTransitionRuleService service;
 
     @GetMapping
-    public List<TransitionRuleAdminDTO> listAll() {
+    public List<TransitionRuleDTO> listAll() {
         return service.listAll();
     }
 
@@ -32,12 +33,12 @@ public class AdminTransitionRuleController {
     }
 
     @PostMapping
-    public ResponseEntity<TransitionRuleAdminDTO> create(@RequestBody TransitionRuleAdminDTO dto) {
+    public ResponseEntity<TransitionRuleDTO> create(@RequestBody TransitionRuleDTO dto) {
         return ResponseEntity.ok(service.create(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TransitionRuleAdminDTO> update(@PathVariable Long id, @RequestBody TransitionRuleAdminDTO dto) {
+    public ResponseEntity<TransitionRuleDTO> update(@PathVariable Long id, @RequestBody TransitionRuleDTO dto) {
         var res = service.update(id, dto);
         return ResponseEntity.ok(res);
     }
@@ -57,13 +58,13 @@ public class AdminTransitionRuleController {
         return ResponseEntity.ok(new ValidateResponse(ok, ok ? null : "Invalid JSON"));
     }
 
-    public record TestRequest(String transitionPrivilegeCode, Map<String, Object> facts) {}
+    public record TestRequest(Long transitionId, Map<String, Object> facts) {}
     public record TestResponse(String nextStatus) {}
 
     @PostMapping("/_test")
     public ResponseEntity<TestResponse> test(@RequestBody TestRequest req) {
-        if (req.transitionPrivilegeCode() == null) return ResponseEntity.badRequest().build();
-        String dest = service.test(req.transitionPrivilegeCode(), req.facts() != null ? req.facts() : Map.of());
+        if (req.transitionId() == null) return ResponseEntity.badRequest().build();
+        String dest = service.test(req.transitionId(), req.facts() != null ? req.facts() : Map.of());
         return ResponseEntity.ok(new TestResponse(dest));
     }
 }
