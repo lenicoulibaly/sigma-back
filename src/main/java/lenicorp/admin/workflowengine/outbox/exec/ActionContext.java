@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.Map;
 
 public record ActionContext(
+        String name,
         String dedupKey,
         Map<String, Object> event,
         Map<String, Object> facts,

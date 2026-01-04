@@ -24,7 +24,7 @@ public class SendEmailExecutor implements OutboxActionExecutor {
 
     @Override
     public void execute(ActionContext ctx) throws Exception {
-        dedupService.runOnce(ctx.dedupKey(), () -> {
+        dedupService.runOnce(ctx.dedupKey(), ctx.name(), () -> {
             Map<String, Object> cfg = ctx.config();
             Object to = ctx.resolver().eval(cfg.get("to"), Map.of(
                     "event", ctx.event(),

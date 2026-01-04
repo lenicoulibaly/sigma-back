@@ -2,10 +2,10 @@ package lenicorp.admin.workflowengine.outbox.dispatcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lenicorp.admin.workflowengine.outbox.exec.*;
-import lenicorp.admin.workflowengine.outbox.model.OutboxEvent;
-import lenicorp.admin.workflowengine.outbox.model.OutboxStatus;
-import lenicorp.admin.workflowengine.outbox.payload.OutboxAction;
-import lenicorp.admin.workflowengine.outbox.payload.TransitionAppliedPayload;
+import lenicorp.admin.workflowengine.outbox.model.entities.OutboxEvent;
+import lenicorp.admin.workflowengine.outbox.model.enums.OutboxStatus;
+import lenicorp.admin.workflowengine.outbox.model.payload.OutboxAction;
+import lenicorp.admin.workflowengine.outbox.model.payload.TransitionAppliedPayload;
 import lenicorp.admin.workflowengine.outbox.repo.OutboxEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -95,8 +95,9 @@ public class OutboxDispatcher {
             OutboxActionExecutor exec = registry.get(action.getActionType());
             if (exec == null) continue; // unknown action type → skip
             String dedupKey = action.getDedupKey();
+            String name = action.getName();
             Map<String, Object> cfg = action.getConfig() != null ? action.getConfig() : Map.of();
-            ActionContext ctx = new ActionContext(dedupKey, eventMap, facts, cfg, resolver, applicationContext);
+            ActionContext ctx = new ActionContext(name, dedupKey, eventMap, facts, cfg, resolver, applicationContext);
             exec.execute(ctx);
         }
     }

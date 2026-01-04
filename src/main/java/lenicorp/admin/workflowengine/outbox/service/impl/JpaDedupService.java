@@ -1,7 +1,7 @@
 package lenicorp.admin.workflowengine.outbox.service.impl;
 
 import jakarta.transaction.Transactional;
-import lenicorp.admin.workflowengine.outbox.model.OutboxActionLog;
+import lenicorp.admin.workflowengine.outbox.model.entities.OutboxActionLog;
 import lenicorp.admin.workflowengine.outbox.repo.OutboxActionLogRepository;
 import lenicorp.admin.workflowengine.outbox.service.DedupService;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +15,12 @@ public class JpaDedupService implements DedupService {
 
     @Override
     @Transactional
-    public boolean runOnce(String dedupKey, Runnable runnable) {
+    public boolean runOnce(String dedupKey, String name, Runnable runnable) {
         try {
             // Try to reserve the key
             OutboxActionLog log = new OutboxActionLog();
             log.setDedupKey(dedupKey);
+            log.setName(name);
             log.setStatus("RESERVED");
             repo.save(log);
         } catch (DataIntegrityViolationException e) {

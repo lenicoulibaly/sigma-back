@@ -23,7 +23,7 @@ public class RunBeanMethodExecutor implements OutboxActionExecutor {
 
     @Override
     public void execute(ActionContext ctx) throws RuntimeException {
-        dedupService.runOnce(ctx.dedupKey(), () -> {
+        dedupService.runOnce(ctx.dedupKey(), ctx.name(), () -> {
             Map<String, Object> cfg = ctx.config();
             String beanName = (String) cfg.get("beanName");
             String methodName = (String) cfg.get("method");
