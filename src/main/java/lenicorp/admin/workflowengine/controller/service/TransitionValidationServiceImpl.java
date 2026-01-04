@@ -1,9 +1,9 @@
-package lenicorp.admin.workflowengine.validation.service.impl;
+package lenicorp.admin.workflowengine.controller.service;
 
 import lenicorp.admin.archive.controller.service.DocumentService;
-import lenicorp.admin.workflowengine.validation.model.TransitionValidationConfig;
-import lenicorp.admin.workflowengine.validation.repo.TransitionValidationConfigRepository;
-import lenicorp.admin.workflowengine.validation.service.TransitionValidationService;
+import lenicorp.admin.workflowengine.model.entities.TransitionValidationConfig;
+import lenicorp.admin.workflowengine.controller.repositories.TransitionValidationConfigRepository;
+import lenicorp.admin.workflowengine.controller.service.TransitionValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +18,8 @@ public class TransitionValidationServiceImpl implements TransitionValidationServ
 
     @Override
     @Transactional(readOnly = true)
-    public Result validate(String transitionPrivilegeCode, String objectTypeCode, Long objectId, String comment, List<String> uploadedDocTypeCodes) {
-        TransitionValidationConfig cfg = cfgRepo.findById(transitionPrivilegeCode).orElse(null);
+    public Result validate(Long transitionId, String objectTypeCode, Long objectId, String comment, List<String> uploadedDocTypeCodes) {
+        TransitionValidationConfig cfg = cfgRepo.findById(transitionId).orElse(null);
         if (cfg == null) return new Result(true, List.of()); // no rules -> valid
 
         List<Violation> violations = new ArrayList<>();

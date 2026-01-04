@@ -31,7 +31,6 @@ public class TransitionRule {
     /**
      * JSON des conditions
      */
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String ruleJson;
 

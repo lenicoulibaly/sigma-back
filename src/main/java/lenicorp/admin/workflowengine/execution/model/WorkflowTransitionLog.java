@@ -25,7 +25,10 @@ public class WorkflowTransitionLog {
     private String workflowCode;
 
     @Column(nullable = false)
-    private String transitionCode;
+    private Long transitionId;
+
+    @Column(nullable = false)
+    private String transitionPrivilegeCode;
 
     @Column(nullable = false)
     private String objectType;
@@ -41,11 +44,9 @@ public class WorkflowTransitionLog {
 
     private String actorUsername;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String comment;
 
-    @Lob
     @Column(columnDefinition = "TEXT")
     private String contextJson;
 

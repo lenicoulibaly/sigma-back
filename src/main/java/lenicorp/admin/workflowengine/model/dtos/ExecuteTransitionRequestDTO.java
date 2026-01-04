@@ -1,4 +1,4 @@
-package lenicorp.admin.workflowengine.dtos;
+package lenicorp.admin.workflowengine.model.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +8,8 @@ import java.util.Map;
 
 @Data @NoArgsConstructor @AllArgsConstructor
 public class ExecuteTransitionRequestDTO {
-    private String transitionCode;
+    private Long transitionId;
+    private String transitionPrivilegeCode;
     private String comment;
     private Map<String, Object> context;
     private String workflowCode; // optionnel quand plusieurs workflows existent pour le même objet

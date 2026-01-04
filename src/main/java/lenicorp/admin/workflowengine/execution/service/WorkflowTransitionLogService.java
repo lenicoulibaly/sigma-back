@@ -7,7 +7,8 @@ import java.util.Map;
 
 public interface WorkflowTransitionLogService {
     void logTransition(String workflowCode,
-                       String transitionCode,
+                       Long transitionId,
+                       String transitionPrivilegeCode,
                        String objectType,
                        String objectId,
                        String fromStatus,

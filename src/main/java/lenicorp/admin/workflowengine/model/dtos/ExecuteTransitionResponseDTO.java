@@ -1,4 +1,4 @@
-package lenicorp.admin.workflowengine.dtos;
+package lenicorp.admin.workflowengine.model.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,8 @@ public class ExecuteTransitionResponseDTO {
     private String objectId;
     private String fromStatus;
     private String toStatus;
-    private String transitionCode;
+    private Long transitionId;
+    private String transitionPrivilegeCode;
     private String ruleMatched; // optionnel: id/ordre de la règle gagnante
     private String auditId;     // si vous liez à un audit externe, sinon null
 }

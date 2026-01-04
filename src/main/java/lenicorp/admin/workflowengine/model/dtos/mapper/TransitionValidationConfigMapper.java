@@ -1,8 +1,8 @@
-package lenicorp.admin.workflowengine.validation.mapper;
+package lenicorp.admin.workflowengine.model.dtos.mapper;
 
 import lenicorp.admin.types.model.entities.Type;
-import lenicorp.admin.workflowengine.validation.dto.TransitionValidationConfigDTO;
-import lenicorp.admin.workflowengine.validation.model.TransitionValidationConfig;
+import lenicorp.admin.workflowengine.model.dtos.TransitionValidationConfigDTO;
+import lenicorp.admin.workflowengine.model.entities.TransitionValidationConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;

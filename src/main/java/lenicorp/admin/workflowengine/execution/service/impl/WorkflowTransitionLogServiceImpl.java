@@ -25,10 +25,12 @@ public class WorkflowTransitionLogServiceImpl implements WorkflowTransitionLogSe
 
     @Override
     @Transactional
-    public void logTransition(String workflowCode, String transitionCode, String objectType, String objectId, String fromStatus, String toStatus, String comment, Map<String, Object> context, List<AttachmentRef> attachments) {
+    public void logTransition(String workflowCode, Long transitionId, String transitionPrivilegeCode, String objectType, String objectId, String fromStatus, String toStatus, String comment, Map<String, Object> context, List<AttachmentRef> attachments)
+    {
         WorkflowTransitionLog log = new WorkflowTransitionLog();
         log.setWorkflowCode(workflowCode);
-        log.setTransitionCode(transitionCode);
+        log.setTransitionId(transitionId);
+        log.setTransitionPrivilegeCode(transitionPrivilegeCode);
         log.setObjectType(objectType);
         log.setObjectId(objectId);
         log.setFromStatus(fromStatus);

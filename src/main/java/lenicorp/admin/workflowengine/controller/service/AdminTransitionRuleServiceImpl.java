@@ -1,14 +1,14 @@
 package lenicorp.admin.workflowengine.admin.service.impl;
+package lenicorp.admin.workflowengine.controller.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lenicorp.admin.workflowengine.admin.dto.TransitionRuleAdminDTO;
-import lenicorp.admin.workflowengine.admin.mapper.TransitionRuleAdminMapper;
-import lenicorp.admin.workflowengine.admin.service.AdminTransitionRuleService;
+import lenicorp.admin.workflowengine.model.dtos.TransitionRuleDTO;
+import lenicorp.admin.workflowengine.model.dtos.mapper.TransitionRuleMapper;
 import lenicorp.admin.workflowengine.engine.rules.RuleEvaluationService;
 import lenicorp.admin.workflowengine.model.entities.Transition;
 import lenicorp.admin.workflowengine.model.entities.TransitionRule;
-import lenicorp.admin.workflowengine.model.repositories.TransitionRepository;
-import lenicorp.admin.workflowengine.model.repositories.TransitionRuleRepository;
+import lenicorp.admin.workflowengine.controller.repositories.TransitionRepository;
+import lenicorp.admin.workflowengine.controller.repositories.TransitionRuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,31 +26,34 @@ public class AdminTransitionRuleServiceImpl implements AdminTransitionRuleServic
     private final TransitionRepository transitionRepo;
     private final RuleEvaluationService ruleEngine;
     private final ObjectMapper objectMapper;
-    private final TransitionRuleAdminMapper mapper;
+    private final TransitionRuleMapper mapper;
 
     @Override
-    public List<TransitionRuleAdminDTO> listAll() {
+    @Transactional(readOnly = true)
+    public List<TransitionRuleDTO> listAll() {
         return ruleRepo.findAll().stream().map(mapper::toDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<TransitionRuleAdminDTO> listByTransition(String privilegeCode) {
-        return ruleRepo.findByTransition_PrivilegeCodeAndActiveTrueOrderByOrdreAsc(privilegeCode)
+    @Transactional(readOnly = true)
+    public List<TransitionRuleDTO> listByTransition(Long transitionId) {
+        return ruleRepo.findActiveRulesByTransitionId(transitionId)
                 .stream().map(mapper::toDto).collect(Collectors.toList());
     }
 
     @Override
-    public TransitionRuleAdminDTO get(Long id) {
+    @Transactional(readOnly = true)
+    public TransitionRuleDTO get(Long id) {
         return ruleRepo.findById(id).map(mapper::toDto).orElse(null);
     }
 
     @Override
     @Transactional
-    public TransitionRuleAdminDTO create(TransitionRuleAdminDTO dto) {
+    public TransitionRuleDTO create(TransitionRuleDTO dto) {
         TransitionRule r = mapper.toEntity(dto);
-        if (dto.getTransitionPrivilegeCode() != null) {
-            Transition t = transitionRepo.findById(dto.getTransitionPrivilegeCode())
-                    .orElseThrow(() -> new IllegalArgumentException("Transition not found: " + dto.getTransitionPrivilegeCode()));
+        if (dto.getTransitionId() != null) {
+            Transition t = transitionRepo.findById(dto.getTransitionId())
+                    .orElseThrow(() -> new IllegalArgumentException("Transition not found: " + dto.getTransitionId()));
             r.setTransition(t);
         }
         r = ruleRepo.save(r);
@@ -59,15 +62,15 @@ public class AdminTransitionRuleServiceImpl implements AdminTransitionRuleServic
 
     @Override
     @Transactional
-    public TransitionRuleAdminDTO update(Long id, TransitionRuleAdminDTO dto) {
+    public TransitionRuleDTO update(Long id, TransitionRuleDTO dto) {
         return ruleRepo.findById(id).map(entity -> {
             // MapStruct doesn't have update method here; we'll set fields explicitly
             entity.setOrdre(dto.getOrdre() != null ? dto.getOrdre() : 0);
             entity.setActive(dto.getActive() != null ? dto.getActive() : Boolean.TRUE);
             entity.setRuleJson(dto.getRuleJson());
-            if (dto.getTransitionPrivilegeCode() != null) {
-                Transition t = transitionRepo.findById(dto.getTransitionPrivilegeCode())
-                        .orElseThrow(() -> new IllegalArgumentException("Transition not found: " + dto.getTransitionPrivilegeCode()));
+            if (dto.getTransitionId() != null) {
+                Transition t = transitionRepo.findById(dto.getTransitionId())
+                        .orElseThrow(() -> new IllegalArgumentException("Transition not found: " + dto.getTransitionId()));
                 entity.setTransition(t);
             } else {
                 entity.setTransition(null);
@@ -100,11 +103,12 @@ public class AdminTransitionRuleServiceImpl implements AdminTransitionRuleServic
     }
 
     @Override
-    public String test(String transitionPrivilegeCode, Map<String, Object> facts) {
-        var rules = ruleRepo.findByTransition_PrivilegeCodeAndActiveTrueOrderByOrdreAsc(transitionPrivilegeCode);
+    @Transactional(readOnly = true)
+    public String test(Long transitionId, Map<String, Object> facts) {
+        var rules = ruleRepo.findActiveRulesByTransitionId(transitionId);
         String dest = ruleEngine.evaluate(rules, facts != null ? facts : Map.of());
         if (dest == null) {
-            Transition t = transitionRepo.findById(transitionPrivilegeCode).orElse(null);
+            Transition t = transitionRepo.findById(transitionId).orElse(null);
             if (t != null && t.getDefaultStatutDestination() != null) dest = t.getDefaultStatutDestination().code;
         }
         return dest;

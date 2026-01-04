@@ -1,13 +1,15 @@
-package lenicorp.admin.workflowengine.admin.dto;
+package lenicorp.admin.workflowengine.model.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data @NoArgsConstructor @AllArgsConstructor
-public class TransitionRuleAdminDTO {
+public class TransitionRuleDTO
+{
     private Long id;
     private Integer ordre;
+    private Long transitionId;
     private String transitionPrivilegeCode; // link to Transition
     private String statutDestinationCode;   // Type code
     private String ruleJson;                // JSON condition

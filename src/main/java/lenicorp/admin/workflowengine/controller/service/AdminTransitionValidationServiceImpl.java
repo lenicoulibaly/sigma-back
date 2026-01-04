@@ -1,12 +1,12 @@
-package lenicorp.admin.workflowengine.validation.service.impl;
+package lenicorp.admin.workflowengine.controller.service;
 
 import lenicorp.admin.types.controller.repositories.TypeRepo;
 import lenicorp.admin.types.model.entities.Type;
-import lenicorp.admin.workflowengine.validation.dto.TransitionValidationConfigDTO;
-import lenicorp.admin.workflowengine.validation.mapper.TransitionValidationConfigMapper;
-import lenicorp.admin.workflowengine.validation.model.TransitionValidationConfig;
-import lenicorp.admin.workflowengine.validation.repo.TransitionValidationConfigRepository;
-import lenicorp.admin.workflowengine.validation.service.AdminTransitionValidationService;
+import lenicorp.admin.workflowengine.model.dtos.TransitionValidationConfigDTO;
+import lenicorp.admin.workflowengine.model.dtos.mapper.TransitionValidationConfigMapper;
+import lenicorp.admin.workflowengine.model.entities.TransitionValidationConfig;
+import lenicorp.admin.workflowengine.controller.repositories.TransitionValidationConfigRepository;
+import lenicorp.admin.workflowengine.controller.service.AdminTransitionValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,17 +21,17 @@ public class AdminTransitionValidationServiceImpl implements AdminTransitionVali
     private final TransitionValidationConfigMapper mapper;
 
     @Override
-    public TransitionValidationConfigDTO get(String transitionPrivilegeCode) {
-        return repo.findById(transitionPrivilegeCode).map(mapper::toDto).orElse(null);
+    public TransitionValidationConfigDTO get(Long transitionId) {
+        return repo.findById(transitionId).map(mapper::toDto).orElse(null);
     }
 
     @Override
     @Transactional
-    public TransitionValidationConfigDTO upsert(String transitionPrivilegeCode, TransitionValidationConfigDTO dto) {
-        TransitionValidationConfig cfg = repo.findById(transitionPrivilegeCode)
+    public TransitionValidationConfigDTO upsert(Long transitionId, TransitionValidationConfigDTO dto) {
+        TransitionValidationConfig cfg = repo.findById(transitionId)
                 .orElseGet(() -> {
                     TransitionValidationConfig c = new TransitionValidationConfig();
-                    c.setTransitionPrivilegeCode(transitionPrivilegeCode);
+                    c.setTransitionId(transitionId);
                     return c;
                 });
         boolean commentRequired = Boolean.TRUE.equals(dto.getCommentRequired());
@@ -54,7 +54,7 @@ public class AdminTransitionValidationServiceImpl implements AdminTransitionVali
 
     @Override
     @Transactional
-    public void delete(String transitionPrivilegeCode) {
-        if (repo.existsById(transitionPrivilegeCode)) repo.deleteById(transitionPrivilegeCode);
+    public void delete(Long transitionId) {
+        if (repo.existsById(transitionId)) repo.deleteById(transitionId);
     }
 }

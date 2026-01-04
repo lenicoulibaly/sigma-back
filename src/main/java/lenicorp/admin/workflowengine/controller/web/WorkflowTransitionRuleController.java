@@ -1,7 +1,7 @@
-package lenicorp.admin.workflowengine.admin.controller;
+package lenicorp.admin.workflowengine.controller.web;
 
-import lenicorp.admin.workflowengine.admin.dto.TransitionRuleAdminDTO;
-import lenicorp.admin.workflowengine.admin.service.AdminTransitionRuleService;
+import lenicorp.admin.workflowengine.model.dtos.TransitionRuleDTO;
+import lenicorp.admin.workflowengine.controller.service.AdminTransitionRuleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/admin/transition-rules")
+@RequestMapping("/transition-rules")
 @RequiredArgsConstructor
 public class AdminTransitionRuleController {
     private final AdminTransitionRuleService service;
@@ -20,13 +20,13 @@ public class AdminTransitionRuleController {
         return service.listAll();
     }
 
-    @GetMapping("/by-transition/{privilegeCode}")
-    public List<TransitionRuleAdminDTO> listByTransition(@PathVariable String privilegeCode) {
-        return service.listByTransition(privilegeCode);
+    @GetMapping("/by-transition/{transitionId}")
+    public List<TransitionRuleDTO> listByTransition(@PathVariable Long transitionId) {
+        return service.listByTransition(transitionId);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TransitionRuleAdminDTO> get(@PathVariable Long id) {
+    public ResponseEntity<TransitionRuleDTO> get(@PathVariable Long id) {
         var dto = service.get(id);
         return dto == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(dto);
     }

@@ -1,6 +1,6 @@
-package lenicorp.admin.workflowengine.admin.mapper;
+package lenicorp.admin.workflowengine.model.dtos.mapper;
 
-import lenicorp.admin.workflowengine.admin.dto.TransitionRuleAdminDTO;
+import lenicorp.admin.workflowengine.model.dtos.TransitionRuleDTO;
 import lenicorp.admin.workflowengine.model.entities.Transition;
 import lenicorp.admin.workflowengine.model.entities.TransitionRule;
 import lenicorp.admin.types.model.entities.Type;
@@ -9,20 +9,22 @@ import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface TransitionRuleAdminMapper {
+public interface TransitionRuleMapper
+{
 
-    @Mapping(target = "transitionPrivilegeCode", source = "transition.privilegeCode")
+    @Mapping(target = "transitionId", source = "transition.transitionId")
+    @Mapping(target = "transitionPrivilegeCode", source = "transition.privilege.code")
     @Mapping(target = "statutDestinationCode", source = "statutDestination.code")
-    TransitionRuleAdminDTO toDto(TransitionRule entity);
+    TransitionRuleDTO toDto(TransitionRule entity);
 
-    @Mapping(target = "transition", source = "transitionPrivilegeCode")
+    @Mapping(target = "transition", source = "transitionId")
     @Mapping(target = "statutDestination", source = "statutDestinationCode")
-    TransitionRule toEntity(TransitionRuleAdminDTO dto);
+    TransitionRule toEntity(TransitionRuleDTO dto);
 
-    default Transition mapTransition(String privilegeCode) {
-        if (privilegeCode == null || privilegeCode.isBlank()) return null;
+    default Transition mapTransition(Long transitionId) {
+        if (transitionId == null) return null;
         Transition t = new Transition();
-        t.setPrivilegeCode(privilegeCode);
+        t.setTransitionId(transitionId);
         return t;
     }
 
