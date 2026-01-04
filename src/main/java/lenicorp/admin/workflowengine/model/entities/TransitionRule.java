@@ -1,15 +1,18 @@
 package lenicorp.admin.workflowengine.model.entities;
 
 import jakarta.persistence.*;
+import lenicorp.admin.security.audit.AuditableEntity;
 import lenicorp.admin.types.model.entities.Type;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "transition_rule")
 @Data @NoArgsConstructor @AllArgsConstructor
-public class TransitionRule {
+@EqualsAndHashCode(callSuper = true)
+public class TransitionRule extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TRANSITION_RULE_ID_GEN")
     @SequenceGenerator(name = "TRANSITION_RULE_ID_GEN", sequenceName = "TRANSITION_RULE_ID_GEN", allocationSize = 10)

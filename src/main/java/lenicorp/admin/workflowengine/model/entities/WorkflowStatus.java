@@ -1,18 +1,17 @@
 package lenicorp.admin.workflowengine.model.entities;
 
 import jakarta.persistence.*;
+import lenicorp.admin.security.audit.AuditableEntity;
 import lenicorp.admin.types.model.entities.Type;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Table(name = "workflow_status")
 @Data @NoArgsConstructor @AllArgsConstructor
-public class WorkflowStatus
+@EqualsAndHashCode(callSuper = true)
+public class WorkflowStatus extends AuditableEntity
 {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "WF_STA_ID_GEN")

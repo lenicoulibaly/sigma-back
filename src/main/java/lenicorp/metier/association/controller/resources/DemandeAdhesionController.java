@@ -15,17 +15,17 @@ public class DemandeAdhesionController
     private final DemandeAdhesionService service;
 
     @PostMapping
-    public DemandeAdhesionDTO createSimple(@RequestBody DemandeAdhesionDTO dto) {
+    public DemandeAdhesionDTO create(@RequestBody DemandeAdhesionDTO dto) {
         return service.create(dto);
     }
 
     @PutMapping("/{id}")
-    public DemandeAdhesionDTO updateSimple(@PathVariable("id") Long id, @RequestBody DemandeAdhesionDTO dto) {
+    public DemandeAdhesionDTO update(@PathVariable("id") Long id, @RequestBody DemandeAdhesionDTO dto) {
         return service.update(id, dto);
     }
 
     @GetMapping("/search")
-    public Page<DemandeAdhesionDTO> searchSimple(
+    public Page<DemandeAdhesionDTO> search(
             @RequestParam(value = "key", required = false) String key,
             @RequestParam(value = "statusGroupCode", required = false) String statusGroupCode,
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,

@@ -1,10 +1,14 @@
 package lenicorp.admin.workflowengine.execution.web;
 
+import lenicorp.admin.workflowengine.execution.dto.WorkflowTransitionLogDTO;
+import lenicorp.admin.workflowengine.execution.service.WorkflowTransitionLogService;
 import lenicorp.admin.workflowengine.model.dtos.ExecuteTransitionRequestDTO;
 import lenicorp.admin.workflowengine.model.dtos.ExecuteTransitionResponseDTO;
 import lenicorp.admin.workflowengine.model.dtos.TransitionDTO;
 import lenicorp.admin.workflowengine.execution.service.WorkflowExecutionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +26,7 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class WorkflowExecutionController {
     private final WorkflowExecutionService workflowExecutionService;
+    private final WorkflowTransitionLogService workflowTransitionLogService;
 
     @GetMapping("/{workflowCode}/objects/{objectType}/{objectId}/available-transitions")
     public ResponseEntity<List<TransitionDTO>> getAvailableTransitions(
@@ -61,5 +66,17 @@ public class WorkflowExecutionController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @GetMapping("/objects/{objectType}/{objectId}/history")
+    public ResponseEntity<Page<WorkflowTransitionLogDTO>> getHistory(
+            @PathVariable String objectType,
+            @PathVariable String objectId,
+            @RequestParam(value = "key", required = false) String key,
+            @RequestParam(value = "transitionIds", required = false) List<Long> transitionIds,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(workflowTransitionLogService.getHistory(objectType, objectId, key, transitionIds, PageRequest.of(page, size)));
     }
 }

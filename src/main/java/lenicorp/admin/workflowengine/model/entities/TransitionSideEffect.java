@@ -1,14 +1,17 @@
 package lenicorp.admin.workflowengine.model.entities;
 
 import jakarta.persistence.*;
+import lenicorp.admin.security.audit.AuditableEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "transition_side_effects")
 @Data @NoArgsConstructor @AllArgsConstructor
-public class TransitionSideEffect {
+@EqualsAndHashCode(callSuper = true)
+public class TransitionSideEffect extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TRANS_SE_ID_GEN")
     @SequenceGenerator(name = "TRANS_SE_ID_GEN", sequenceName = "TRANS_SE_ID_GEN", allocationSize = 10)

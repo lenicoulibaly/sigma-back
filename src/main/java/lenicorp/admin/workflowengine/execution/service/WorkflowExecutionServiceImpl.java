@@ -1,9 +1,7 @@
-package lenicorp.admin.workflowengine.execution.service.impl;
+package lenicorp.admin.workflowengine.execution.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lenicorp.admin.security.controller.services.specs.IAuthorityService;
 import lenicorp.admin.security.controller.services.specs.IJwtService;
-import lenicorp.admin.security.model.entities.AppUser;
 import lenicorp.admin.workflowengine.controller.repositories.TransitionRepository;
 import lenicorp.admin.workflowengine.controller.repositories.TransitionRuleRepository;
 import lenicorp.admin.workflowengine.controller.service.TransitionValidationService;
@@ -12,12 +10,9 @@ import lenicorp.admin.workflowengine.engine.adapter.ObjectAdapterRegistry;
 import lenicorp.admin.workflowengine.engine.rules.RuleEvaluationService;
 import lenicorp.admin.workflowengine.execution.archive.ArchiveGateway;
 import lenicorp.admin.workflowengine.execution.dto.AttachmentRef;
-import lenicorp.admin.workflowengine.execution.service.WorkflowExecutionService;
-import lenicorp.admin.workflowengine.execution.service.WorkflowTransitionLogService;
 import lenicorp.admin.workflowengine.model.dtos.ExecuteTransitionRequestDTO;
 import lenicorp.admin.workflowengine.model.dtos.ExecuteTransitionResponseDTO;
 import lenicorp.admin.workflowengine.model.dtos.TransitionDTO;
-import lenicorp.admin.workflowengine.model.dtos.mapper.TransitionMapper;
 import lenicorp.admin.workflowengine.model.entities.Transition;
 import lenicorp.admin.workflowengine.outbox.model.payload.OutboxAction;
 import lenicorp.admin.workflowengine.outbox.model.payload.TransitionAppliedPayload;
@@ -27,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;

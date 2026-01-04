@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -23,5 +23,5 @@ public class TransitionAppliedPayload {
 
     // optional metadata
     private String correlationId;
-    private Instant occurredAt;
+    private LocalDateTime occurredAt;
 }

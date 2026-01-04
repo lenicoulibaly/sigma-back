@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,7 +22,7 @@ public class OutboxService {
 
     @Transactional
     public UUID enqueueTransitionApplied(TransitionAppliedPayload payload) {
-        if (payload.getOccurredAt() == null) payload.setOccurredAt(Instant.now());
+        if (payload.getOccurredAt() == null) payload.setOccurredAt(LocalDateTime.now());
         if (payload.getCorrelationId() == null) payload.setCorrelationId(UUID.randomUUID().toString());
         String json = toJson(payload);
         OutboxEvent evt = new OutboxEvent();

@@ -1,12 +1,12 @@
 package lenicorp.admin.workflowengine.execution.model;
 
 import jakarta.persistence.*;
+import lenicorp.admin.security.audit.AuditableEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +15,8 @@ import java.util.List;
         @Index(name = "ix_wf_log_object", columnList = "objectType, objectId")
 })
 @Data @NoArgsConstructor @AllArgsConstructor
-public class WorkflowTransitionLog {
+@EqualsAndHashCode(callSuper = true)
+public class WorkflowTransitionLog extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "WF_TRANS_LOG_ID_GEN")
     @SequenceGenerator(name = "WF_TRANS_LOG_ID_GEN", sequenceName = "WF_TRANS_LOG_ID_GEN", allocationSize = 10)
@@ -24,10 +25,8 @@ public class WorkflowTransitionLog {
     @Column(nullable = false)
     private String workflowCode;
 
-    @Column(nullable = false)
     private Long transitionId;
 
-    @Column(nullable = false)
     private String transitionPrivilegeCode;
 
     @Column(nullable = false)
@@ -36,7 +35,6 @@ public class WorkflowTransitionLog {
     @Column(nullable = false)
     private String objectId;
 
-    @Column(nullable = false)
     private String fromStatus;
 
     @Column(nullable = false)
@@ -50,9 +48,6 @@ public class WorkflowTransitionLog {
     @Column(columnDefinition = "TEXT")
     private String contextJson;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private Instant occurredAt;
 
     @OneToMany(mappedBy = "log", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkflowTransitionAttachment> attachments = new ArrayList<>();

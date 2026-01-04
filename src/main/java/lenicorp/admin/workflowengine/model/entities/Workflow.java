@@ -1,9 +1,11 @@
 package lenicorp.admin.workflowengine.model.entities;
 
 import jakarta.persistence.*;
+import lenicorp.admin.security.audit.AuditableEntity;
 import lenicorp.admin.types.model.entities.Type;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +13,8 @@ import java.util.List;
 @Entity
 @Table(name = "workflow")
 @Data @NoArgsConstructor @AllArgsConstructor
-public class Workflow {
+@EqualsAndHashCode(callSuper = true)
+public class Workflow extends AuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "WF_ID_GEN")
     @SequenceGenerator(name = "WF_ID_GEN", sequenceName = "WF_ID_GEN", allocationSize = 10)
