@@ -95,6 +95,67 @@ public class MailService implements MailServiceInterface
         return sendMailAsync(mailRequest);
     }
 
+    @Override
+    public CompletableFuture<MailResponse> envoyerEmailMembreNonActif(String destinataire, String nomDestinataire, String nomAssociation)
+    {
+        String sujet = "Notification : Statut de membre non actif";
+
+        // Charger le fichier HTML de notification de membre non actif
+        String corpsHtml = chargerTemplateHtml("templates/emails/membre-non-actif.html")
+                .replace("${nomDestinataire}", nomDestinataire)
+                .replace("${nomAssociation}", nomAssociation);
+
+        MailRequest mailRequest = MailRequest.builder()
+                .to(destinataire)
+                .subject(sujet)
+                .content(corpsHtml)
+                .isHtml(true)
+                .build();
+
+        return sendMailAsync(mailRequest);
+    }
+
+    @Override
+    public CompletableFuture<MailResponse> envoyerEmailMembreExclu(String destinataire, String nomDestinataire, String nomAssociation)
+    {
+        String sujet = "Notification importante : Exclusion de l'association";
+
+        // Charger le fichier HTML de notification d'exclusion
+        String corpsHtml = chargerTemplateHtml("templates/emails/membre-exclu.html")
+                .replace("${nomDestinataire}", nomDestinataire)
+                .replace("${nomAssociation}", nomAssociation);
+
+        MailRequest mailRequest = MailRequest.builder()
+                .to(destinataire)
+                .subject(sujet)
+                .content(corpsHtml)
+                .isHtml(true)
+                .build();
+
+        return sendMailAsync(mailRequest);
+    }
+
+    @Override
+    public CompletableFuture<MailResponse> envoyerEmailMembreActif(String destinataire, String nomDestinataire, String nomAssociation, String lienConnexion)
+    {
+        String sujet = "Félicitations : Vous êtes désormais membre actif";
+
+        // Charger le fichier HTML de notification de membre actif
+        String corpsHtml = chargerTemplateHtml("templates/emails/membre-actif.html")
+                .replace("${nomDestinataire}", nomDestinataire)
+                .replace("${nomAssociation}", nomAssociation)
+                .replace("${lienConnexion}", lienConnexion);
+
+        MailRequest mailRequest = MailRequest.builder()
+                .to(destinataire)
+                .subject(sujet)
+                .content(corpsHtml)
+                .isHtml(true)
+                .build();
+
+        return sendMailAsync(mailRequest);
+    }
+
     @Override @Transactional
     public CompletableFuture<MailResponse> sendMailAsync(MailRequest mailRequest) 
     {
