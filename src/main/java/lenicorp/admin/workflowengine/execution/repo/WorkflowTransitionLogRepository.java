@@ -17,7 +17,7 @@ public interface WorkflowTransitionLogRepository extends JpaRepository<WorkflowT
 
     @Query("SELECT l FROM WorkflowTransitionLog l " +
             "WHERE l.objectType = :objectType AND l.objectId = :objectId " +
-            "AND (:key IS NULL OR UPPER(l.comment) LIKE UPPER(CONCAT('%', :key, '%'))) " +
+            "AND (:key IS NULL OR UPPER(coalesce(l.comment, '')) LIKE UPPER(CONCAT('%', :key, '%'))) " +
             "AND (:transitionIds IS NULL OR l.transitionId IN :transitionIds) " +
             "ORDER BY l.createdAt DESC")
     Page<WorkflowTransitionLog> searchHistory(@Param("objectType") String objectType,

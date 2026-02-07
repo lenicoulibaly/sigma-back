@@ -70,4 +70,7 @@ public interface TransitionRepository extends JpaRepository<Transition, Long> {
           AND t.active = true
     """)
     List<String> findPrivilegeCodesByGroupId(@Param("groupId") Long groupId);
+
+    @Query("SELECT t.libelle FROM Transition t WHERE t.transitionId = ?1")
+    String getTransitionLibelleByid(Long transitionId);
 }

@@ -3,11 +3,13 @@ package lenicorp.admin.workflowengine.execution.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lenicorp.admin.security.controller.services.specs.IJwtService;
+import lenicorp.admin.workflowengine.controller.repositories.TransitionRepository;
 import lenicorp.admin.workflowengine.execution.dto.AttachmentRef;
 import lenicorp.admin.workflowengine.execution.dto.WorkflowTransitionLogDTO;
 import lenicorp.admin.workflowengine.execution.model.WorkflowTransitionAttachment;
 import lenicorp.admin.workflowengine.execution.model.WorkflowTransitionLog;
 import lenicorp.admin.workflowengine.execution.repo.WorkflowTransitionLogRepository;
+import lenicorp.admin.workflowengine.model.entities.Transition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class WorkflowTransitionLogServiceImpl implements WorkflowTransitionLogService {
     private final WorkflowTransitionLogRepository logRepository;
+    private final TransitionRepository transitionRepository;
     private final IJwtService jwtService;
     private final ObjectMapper objectMapper;
 
@@ -71,6 +74,11 @@ public class WorkflowTransitionLogServiceImpl implements WorkflowTransitionLogSe
         dto.setId(log.getId());
         dto.setWorkflowCode(log.getWorkflowCode());
         dto.setTransitionId(log.getTransitionId());
+        if (log.getTransitionId() != null)
+        {
+            String transitionLibelle = transitionRepository.getTransitionLibelleByid(log.getTransitionId());
+            dto.setTransitionLibelle(transitionLibelle);
+        }
         dto.setTransitionPrivilegeCode(log.getTransitionPrivilegeCode());
         dto.setObjectType(log.getObjectType());
         dto.setObjectId(log.getObjectId());

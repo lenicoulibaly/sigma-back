@@ -26,7 +26,6 @@ public class WorkflowTransitionLog extends AuditableEntity {
     private String workflowCode;
 
     private Long transitionId;
-
     private String transitionPrivilegeCode;
 
     @Column(nullable = false)

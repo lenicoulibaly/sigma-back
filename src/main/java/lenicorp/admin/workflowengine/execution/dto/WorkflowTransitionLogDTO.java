@@ -12,6 +12,7 @@ public class WorkflowTransitionLogDTO {
     private Long id;
     private String workflowCode;
     private Long transitionId;
+    private String transitionLibelle;
     private String transitionPrivilegeCode;
     private String objectType;
     private String objectId;
