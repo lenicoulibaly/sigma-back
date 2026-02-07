@@ -8,8 +8,6 @@ import lenicorp.admin.security.model.validators.ExistingUserId;
 import lenicorp.admin.security.model.views.VUserProfile;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -232,45 +230,18 @@ public interface AuthAssoRepo extends JpaRepository<AuthAssociation, Long>
 
     // Native query to find active and current profiles by user ID
     @Query(value = """
-            select vup.ass_id, vup.user_id, vup.email, vup.first_name, vup.last_name, 
-            vup.profile_code, vup.profile_name, vup.profile_description,
-            vup.ass_str_id, vup.ass_str_name, vup.user_profile_ass_type_code, 
-            vup.user_profile_ass_type_name, vup.libelle, vup.starting_date, vup.ending_date,
-            vup.ass_status_code, vup.ass_status_name, vup.ordre
-            from v_user_profile vup 
-            where vup.user_id = :userId
-            and vup.ass_status_code in ('STA_ASS_ACT', 'STA_ASS_CUR')
-            order by vup.ordre, vup.profile_name
-            """, nativeQuery = true)
-    List<Object[]> findActiveAndCurrentProfilesByUserIdRaw(@Param("userId") Long userId);
-
-    // Helper method to convert raw query results to UserProfileAssoDTO objects
-    default List<UserProfileAssoDTO> findActiveAndCurrentProfilesByUserId(Long userId) {
-        if (userId == null) return List.of();
-        return findActiveAndCurrentProfilesByUserIdRaw(userId).stream()
-                .map(row -> {
-                    UserProfileAssoDTO dto = new UserProfileAssoDTO();
-                    dto.setId((Long) row[0]);
-                    dto.setUserId((Long) row[1]);
-                    dto.setEmail((String) row[2]);
-                    dto.setFirstName((String) row[3]);
-                    dto.setLastName((String) row[4]);
-                    dto.setProfileCode((String) row[5]);
-                    dto.setProfileName((String) row[6]);
-                    dto.setStrId((Long) row[8]);
-                    dto.setStrName((String) row[9]);
-                    dto.setUserProfileAssTypeCode((String) row[10]);
-                    dto.setUserProfileAssTypeName((String) row[11]);
-                    dto.setLibelle((String) row[12]);
-                    dto.setStartingDate(row[13] != null ? ((java.sql.Date) row[13]).toLocalDate() : null);
-                    dto.setEndingDate(row[14] != null ? ((java.sql.Date) row[14]).toLocalDate() : null);
-                    dto.setAssStatusCode((String) row[15]);
-                    dto.setAssStatusName((String) row[16]);
-                    dto.setOrdre(((Number) row[17]).longValue());
-                    return dto;
-                })
-                .collect(java.util.stream.Collectors.toList());
-    }
+            select new lenicorp.admin.security.model.dtos.UserProfileAssoDTO(
+            vup.assId, vup.libelle, vup.userId, vup.email, u.matricule, grade.code, vup.profileCode, vup.profileName, vup.assStrId, 
+            vup.assStrName, vup.userProfileAssTypeCode, vup.userProfileAssTypeName, vup.startingDate, vup.endingDate, 
+            vup.assStatusCode, vup.assStatusName, vup.ordre, vup.firstName, vup.lastName, vup.assoId, vup.assoName,
+            vup.sectionId, vup.sectionName            
+            )
+            from VUserProfile vup join AppUser u on vup.userId = u.userId left join u.grade grade 
+            where vup.userId = :userId
+            and vup.assStatusCode in ('STA_ASS_ACT', 'STA_ASS_CUR')
+            order by vup.ordre, vup.profileName
+            """)
+    List<UserProfileAssoDTO> findActiveAndCurrentProfilesByUserId(@Param("userId") Long userId);
 
     @Query("""
             select new lenicorp.admin.security.model.dtos.AuthorityDTO
@@ -377,7 +348,7 @@ public interface AuthAssoRepo extends JpaRepository<AuthAssociation, Long>
         , vup.userId, vup.email, u.matricule, grade.code, vup.profileCode, vup.profileName
         , vup.assStrId, vup.assStrName, vup.userProfileAssTypeCode, vup.userProfileAssTypeName
         , vup.startingDate, vup.endingDate, vup.assStatusCode, ass.name , ass.ordre
-        , vup.firstName, vup.lastName)
+        , vup.firstName, vup.lastName, vup.assoId, vup.assoName, vup.sectionId, vup.sectionName)
         from VUserProfile vup 
             join AppUser u on vup.userId = u.userId 
             left join u.grade grade 

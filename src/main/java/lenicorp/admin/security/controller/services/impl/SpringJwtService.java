@@ -60,11 +60,15 @@ public class SpringJwtService implements IJwtService
         {
             claims.put("currentProfileCode", userProfile.getProfileCode());
             claims.put("currentProfileName", userProfile.getProfileName());
-            claims.put("currentProfileStrId", userProfile.getUserStrId());
-            claims.put("profileStrId", userProfile.getAssStrId());
+            claims.put("currentProfileStrId", userProfile.getAssStrId());
+            claims.put("profileStrId", userProfile.getUserStrId());
             claims.put("profileStrName", userProfile.getAssStrName());
             claims.put("profileStrSigles", userProfile.getAssStrSigles());
             claims.put("profileStrChaineSigles", userProfile.getAssStrChaineSigles());
+            claims.put("assoId", userProfile.getAssoId());
+            claims.put("assoName", userProfile.getAssoName());
+            claims.put("sectionId", userProfile.getSectionId());
+            claims.put("sectionName", userProfile.getSectionName());
             claims.put("connexionId", UUID.randomUUID().toString());
         }
 

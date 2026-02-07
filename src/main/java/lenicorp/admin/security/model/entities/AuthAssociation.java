@@ -55,6 +55,10 @@ public class AuthAssociation
     private Type userProfileAssType; //Titulaire, Intérimaire
     private LocalDate startingDate;
     private LocalDate endingDate;
+    @Column(name = "asso_id")
+    private Long assoId;
+    @Column(name = "section_id")
+    private Long sectionId;
 
     public static AuthAssociation createRolPrvAss(String roleCode, String privilegeCode)
     {
@@ -81,6 +85,14 @@ public class AuthAssociation
         authAssociation.setProfile(new AppAuthority(profileCode));
         authAssociation.setStructure(new Structure(strId));
         authAssociation.setType(new Type("PRFL_ROL"));
+        return authAssociation;
+    }
+
+    public static AuthAssociation createUsrPrflAss(Long userId, String profileCode, Long strId, Long associationId, Long sectionId)
+    {
+        AuthAssociation authAssociation = createUsrPrflAss(userId, profileCode, strId);
+        authAssociation.setAssoId(associationId);
+        authAssociation.setSectionId(sectionId);
         return authAssociation;
     }
 }

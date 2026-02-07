@@ -59,13 +59,18 @@ public class UserProfileAssoDTO implements Serializable
     Long ordre;
     String firstName;
     String lastName;
+    Long assoId;
+    String assoName;
+    Long sectionId;
+    String sectionName;
 
     public UserProfileAssoDTO(Long id, String libelle, Long userId, String email, String matricule, String gradeCode,
                                String profileCode, String profileName, Long strId, String strName,
                                String userProfileAssTypeCode, String userProfileAssTypeName,
                                LocalDate startingDate, LocalDate endingDate,
                                String assStatusCode, String assStatusName,
-                               Integer ordre, String firstName, String lastName)
+                               Integer ordre, String firstName, String lastName,
+                               Long assoId, String assoName, Long sectionId, String sectionName)
     {
         this.id = id;
         this.libelle = libelle;
@@ -86,5 +91,9 @@ public class UserProfileAssoDTO implements Serializable
         this.ordre = ordre == null ? null : ordre.longValue();
         this.firstName = firstName;
         this.lastName = lastName;
+        this.assoId = assoId;
+        this.assoName = assoName;
+        this.sectionId = sectionId;
+        this.sectionName = sectionName;
     }
 }

@@ -63,4 +63,15 @@ public class VUserProfile
     @Column(name = "ordre")
     private Integer ordre;
 
+    @Column(name = "asso_id")
+    private Long assoId;
+
+    @Column(name = "asso_name")
+    private String assoName;
+
+    @Column(name = "section_id")
+    private Long sectionId;
+
+    @Column(name = "section_name")
+    private String sectionName;
 }

@@ -152,6 +152,14 @@ public class AuthorityService implements IAuthorityService
     @Transactional
     public void addProfileToUser(UserProfileAssoDTO dto)
     {
+        if (dto.getAssoId() == null && dto.getSectionId() == null)
+        {
+            VUserProfile currentProfile = jwtService.getCurrentUserProfile();
+            if (currentProfile != null)
+            {
+                dto.setAssoId(currentProfile.getAssoId());
+            }
+        }
         AuthAssociation association = authAssoMapper.toEntity(dto);
         association = authAssoRepo.save(association);
         if(!authAssoRepo.userHasAnyProfile(dto.getUserId()))association.setAssStatus(new Type("STA_ASS_CUR"));
