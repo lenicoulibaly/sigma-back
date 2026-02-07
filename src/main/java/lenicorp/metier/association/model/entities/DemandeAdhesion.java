@@ -20,9 +20,6 @@ public class DemandeAdhesion extends AuditableEntity
     @SequenceGenerator(name = "DEMANDE_ADHESION_ID_GEN", sequenceName = "DEMANDE_ADHESION_ID_GEN", allocationSize = 10)
     private Long demandeId;
 
-    @Column(length = 50)
-    private String reference;
-
     @ManyToOne @JoinColumn(name = "ASSO_ID")
     private Association association;
 
@@ -45,8 +42,6 @@ public class DemandeAdhesion extends AuditableEntity
 
     @Column(length = 4000)
     private String message;
-
-    private BigDecimal montantCotisationEstime;
 
     @OneToOne @JoinColumn(name = "ADHESION_ID")
     private Adhesion adhesionCreee; // renseigné si APPROUVEE

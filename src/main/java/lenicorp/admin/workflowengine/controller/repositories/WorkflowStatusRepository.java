@@ -75,4 +75,7 @@ public interface WorkflowStatusRepository extends JpaRepository<WorkflowStatus, 
 
     @Query("SELECT ws.status.code FROM WorkflowStatus ws WHERE ws.workflow.code = :workflowCode AND ws.start = true")
     String findStartStatusCodeByWorkflowCode(@Param("workflowCode") String workflowCode);
+
+    @Query("SELECT ws FROM WorkflowStatus ws WHERE ws.workflow.code = :workflowCode AND ws.status.code = :statusCode")
+    java.util.Optional<WorkflowStatus> findByWorkflowCodeAndStatusCode(@Param("workflowCode") String workflowCode, @Param("statusCode") String statusCode);
 }

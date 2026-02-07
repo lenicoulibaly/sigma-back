@@ -1,21 +1,26 @@
 package lenicorp.metier.association.model.mappers;
 
-import lenicorp.admin.security.controller.services.specs.IJwtService;
-import lenicorp.admin.security.model.entities.AppUser;
+import lenicorp.admin.workflowengine.controller.repositories.WorkflowStatusRepository;
+import lenicorp.admin.workflowengine.model.entities.WorkflowStatus;
 import lenicorp.metier.association.model.dtos.CreateDemandeAdhesionDTO;
 import lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
 import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Autowired;
+
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface DemandeAdhesionMapper {
+public abstract class DemandeAdhesionMapper {
+
+    @Autowired
+    protected WorkflowStatusRepository workflowStatusRepository;
 
     // Record(Create) -> Entity
-    @Mapping(target = "association", expression = "java(dto.assoId() == null ? null : new Association(dto.assoId()))")
-    @Mapping(target = "section", expression = "java(dto.sectionId() == null ? null : new Section(dto.sectionId()))")
+    @Mapping(target = "association", expression = "java(dto.assoId() == null ? null : new lenicorp.metier.association.model.entities.Association(dto.assoId()))")
+    @Mapping(target = "section", expression = "java(dto.sectionId() == null ? null : new lenicorp.metier.association.model.entities.Section(dto.sectionId()))")
     @Mapping(target = "demandeur", expression = "java(jwtService.getCurrentUser())")
     @Mapping(target = "dateSoumission", expression = "java(java.time.LocalDateTime.now())")
     // statut & reference & dateDecision & adhesionCreee managed in service
-    DemandeAdhesion mapTopDemandeAdhesion(CreateDemandeAdhesionDTO dto, @Context IJwtService jwtService);
+    public abstract DemandeAdhesion mapTopDemandeAdhesion(CreateDemandeAdhesionDTO dto, @Context lenicorp.admin.security.controller.services.specs.IJwtService jwtService);
 
     // Entity -> Record(Read)
     @Mapping(target = "assoId", source = "association.assoId")
@@ -24,25 +29,30 @@ public interface DemandeAdhesionMapper {
     @Mapping(target = "userFullName", expression = "java(combineUserName(entity.getDemandeur()))")
     @Mapping(target = "statutCode", source = "statut.code")
     @Mapping(target = "statutName", source = "statut.name")
-    @Mapping(target = "montantDu", source = "montantCotisationEstime")
+    @Mapping(target = "statutColor", expression = "java(getStatutColor(entity))")
+    @Mapping(target = "statutIcon", expression = "java(getStatutIcon(entity))")
     @Mapping(target = "adhesionIdCreee", source = "adhesionCreee.adhesionId")
+    @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "decideurFullName", expression = "java(null)")
-    ReadDemandeAdhesionDTO mapTopDemandeAdhesionReadDTO(DemandeAdhesion entity);
+    public abstract ReadDemandeAdhesionDTO mapTopDemandeAdhesionReadDTO(DemandeAdhesion entity);
 
-    @Mapping(target = "association", source = "associationId", qualifiedByName = "idToAssociation")
+    @Mapping(target = "association", source = "assoId", qualifiedByName = "idToAssociation")
     @Mapping(target = "section", source = "sectionId", qualifiedByName = "idToSection")
     @Mapping(target = "demandeur", source = "demandeurId", qualifiedByName = "idToUser")
-    DemandeAdhesion toEntity(lenicorp.metier.association.model.dtos.DemandeAdhesionDTO dto);
+    public abstract DemandeAdhesion toEntity(lenicorp.metier.association.model.dtos.DemandeAdhesionDTO dto);
 
-    @Mapping(target = "associationId", source = "association.assoId")
-    @Mapping(target = "associationNom", source = "association.assoName")
+    @Mapping(target = "assoId", source = "association.assoId")
+    @Mapping(target = "assoName", source = "association.assoName")
     @Mapping(target = "sectionId", source = "section.sectionId")
-    @Mapping(target = "sectionNom", source = "section.sectionName")
+    @Mapping(target = "sectionName", source = "section.sectionName")
     @Mapping(target = "demandeurId", source = "demandeur.userId")
     @Mapping(target = "demandeurNom", expression = "java(combineUserName(entity.getDemandeur()))")
     @Mapping(target = "statutCode", source = "statut.code")
     @Mapping(target = "statutNom", source = "statut.name")
-    lenicorp.metier.association.model.dtos.DemandeAdhesionDTO toDto(DemandeAdhesion entity);
+    @Mapping(target = "statutColor", expression = "java(getStatutColor(entity))")
+    @Mapping(target = "statutIcon", expression = "java(getStatutIcon(entity))")
+    @Mapping(target = "createdAt", source = "createdAt")
+    public abstract lenicorp.metier.association.model.dtos.DemandeAdhesionDTO toDto(DemandeAdhesion entity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "demandeId", ignore = true)
@@ -50,32 +60,46 @@ public interface DemandeAdhesionMapper {
     @Mapping(target = "association", ignore = true)
     @Mapping(target = "section", ignore = true)
     @Mapping(target = "demandeur", ignore = true)
-    void updateEntity(lenicorp.metier.association.model.dtos.DemandeAdhesionDTO dto, @MappingTarget DemandeAdhesion entity);
+    public abstract void updateEntity(lenicorp.metier.association.model.dtos.DemandeAdhesionDTO dto, @MappingTarget DemandeAdhesion entity);
 
     @Named("idToAssociation")
-    default lenicorp.metier.association.model.entities.Association idToAssociation(Long id) {
+    protected lenicorp.metier.association.model.entities.Association idToAssociation(Long id) {
         if (id == null) return null;
         return new lenicorp.metier.association.model.entities.Association(id);
     }
 
     @Named("idToSection")
-    default lenicorp.metier.association.model.entities.Section idToSection(Long id) {
+    protected lenicorp.metier.association.model.entities.Section idToSection(Long id) {
         if (id == null) return null;
         return new lenicorp.metier.association.model.entities.Section(id);
     }
 
     @Named("idToUser")
-    default lenicorp.admin.security.model.entities.AppUser idToUser(Long id) {
+    protected lenicorp.admin.security.model.entities.AppUser idToUser(Long id) {
         if (id == null) return null;
         return new lenicorp.admin.security.model.entities.AppUser(id);
     }
 
     // Helper
-    default String combineUserName(AppUser u) {
+    protected String combineUserName(lenicorp.admin.security.model.entities.AppUser u) {
         if (u == null) return null;
         String fn = u.getFirstName() == null ? "" : u.getFirstName();
         String ln = u.getLastName() == null ? "" : u.getLastName();
         String full = (fn + " " + ln).trim();
         return full.isEmpty() ? null : full;
+    }
+
+    protected String getStatutColor(DemandeAdhesion entity) {
+        if (entity.getStatut() == null) return null;
+        return workflowStatusRepository.findByWorkflowCodeAndStatusCode("DMD_ADH", entity.getStatut().code)
+                .map(WorkflowStatus::getColor)
+                .orElse(null);
+    }
+
+    protected String getStatutIcon(DemandeAdhesion entity) {
+        if (entity.getStatut() == null) return null;
+        return workflowStatusRepository.findByWorkflowCodeAndStatusCode("DMD_ADH", entity.getStatut().code)
+                .map(WorkflowStatus::getIcon)
+                .orElse(null);
     }
 }
