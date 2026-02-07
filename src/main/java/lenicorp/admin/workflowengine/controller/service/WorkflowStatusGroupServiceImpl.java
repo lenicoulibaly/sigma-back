@@ -1,6 +1,7 @@
 package lenicorp.admin.workflowengine.controller.service;
 
 import lenicorp.admin.workflowengine.controller.repositories.WorkflowStatusGroupRepository;
+import lenicorp.admin.security.controller.services.specs.IJwtService;
 import lenicorp.admin.workflowengine.model.dtos.WorkflowStatusGroupDTO;
 import lenicorp.admin.workflowengine.model.dtos.mapper.WorkflowStatusGroupMapper;
 import lenicorp.admin.workflowengine.model.entities.WorkflowStatusGroup;
@@ -23,6 +24,7 @@ public class WorkflowStatusGroupServiceImpl implements WorkflowStatusGroupServic
     private final lenicorp.admin.workflowengine.controller.repositories.WorkflowStatusRepository statusRepo;
     private final lenicorp.admin.workflowengine.controller.repositories.TransitionRepository transitionRepo;
     private final lenicorp.admin.security.controller.repositories.AuthorityRepo authorityRepo;
+    private final IJwtService jwtService;
     private final WorkflowStatusGroupMapper mapper;
 
     @Override
@@ -122,20 +124,36 @@ public class WorkflowStatusGroupServiceImpl implements WorkflowStatusGroupServic
     }
 
     @Override
-    public Page<WorkflowStatusGroupDTO> search(String key, Pageable pageable)
+    public Page<WorkflowStatusGroupDTO> search(String key, Long workflowId, Pageable pageable)
     {
         String normalizedKey = key == null ? null : "%" + StringUtils.stripAccentsToUpperCase(key) + "%";
-        Page<WorkflowStatusGroupDTO> page = repository.search(normalizedKey, pageable);
-        page.getContent().forEach(dto -> {
-            repository.findById(dto.getId()).ifPresent(entity -> {
-                dto.setStatusIds(mapper.statusIdsFromStatuses(entity.getStatuses()));
-                dto.setStatusCodes(mapper.statusCodesFromStatuses(entity.getStatuses()));
-                dto.setStatusNames(mapper.statusNamesFromStatuses(entity.getStatuses()));
-                dto.setAuthorityCodes(mapper.authorityCodesFromAuthorities(entity.getAuthorities()));
-                dto.setAuthorityNames(mapper.authorityNamesFromAuthorities(entity.getAuthorities()));
-            });
+        Page<WorkflowStatusGroupDTO> page = repository.searchAccessible(normalizedKey, workflowId, pageable);
+        List<WorkflowStatusGroupDTO> content = page.getContent().stream()
+                .peek(this::fillDto)
+                .collect(Collectors.toList());
+        return new org.springframework.data.domain.PageImpl<>(content, pageable, page.getTotalElements());
+    }
+
+    @Override
+    public List<WorkflowStatusGroupDTO> getAccessibleWorkflowStatusGroupByWorkflowCode(String workflowCode)
+    {
+        List<WorkflowStatusGroupDTO> dtos = repository.getAccessibleWorkflowStatusGroupByWorkflowCode(workflowCode);
+        dtos.forEach(this::fillDto);
+        return dtos.stream()
+                .filter(dto -> dto.getAuthorityCodes() == null || dto.getAuthorityCodes().isEmpty()
+                        || dto.getAuthorityCodes().stream().anyMatch(jwtService::hasPrivilege))
+                .collect(Collectors.toList());
+    }
+
+    private void fillDto(WorkflowStatusGroupDTO dto)
+    {
+        repository.findById(dto.getId()).ifPresent(entity -> {
+            dto.setStatusIds(mapper.statusIdsFromStatuses(entity.getStatuses()));
+            dto.setStatusCodes(mapper.statusCodesFromStatuses(entity.getStatuses()));
+            dto.setStatusNames(mapper.statusNamesFromStatuses(entity.getStatuses()));
+            dto.setAuthorityCodes(mapper.authorityCodesFromAuthorities(entity.getAuthorities()));
+            dto.setAuthorityNames(mapper.authorityNamesFromAuthorities(entity.getAuthorities()));
         });
-        return page;
     }
 
     @Override

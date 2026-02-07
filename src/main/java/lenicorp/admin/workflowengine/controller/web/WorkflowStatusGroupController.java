@@ -17,13 +17,15 @@ public class WorkflowStatusGroupController {
 
     private final WorkflowStatusGroupService service;
 
-    @GetMapping("/search")
+    @GetMapping("/search/{workflowId}")
     public Page<WorkflowStatusGroupDTO> search(
+            @PathVariable(required = true) Long workflowId,
             @RequestParam(value = "key", required = false) String key,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-        return service.search(key, PageRequest.of(page, size));
+        return service.search(key, workflowId, PageRequest.of(page, size));
+    }
     }
 
     @PostMapping

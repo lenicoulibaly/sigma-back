@@ -57,5 +57,6 @@ public class WorkflowStatus extends AuditableEntity
             joinColumns = @JoinColumn(name = "status_id"),
             inverseJoinColumns = @JoinColumn(name = "group_id")
     )
+    @OrderBy("ordre ASC")
     private List<WorkflowStatusGroup> groups;
 }

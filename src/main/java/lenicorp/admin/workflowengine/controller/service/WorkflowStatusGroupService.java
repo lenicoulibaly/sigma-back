@@ -10,6 +10,6 @@ public interface WorkflowStatusGroupService {
     WorkflowStatusGroupDTO create(WorkflowStatusGroupDTO dto);
     WorkflowStatusGroupDTO update(Long id, WorkflowStatusGroupDTO dto);
     void delete(Long id);
-    Page<WorkflowStatusGroupDTO> search(String key, Pageable pageable);
+    Page<WorkflowStatusGroupDTO> search(String key, Long workflowId, Pageable pageable);
     List<String> getAuthorityCodes(Long id);
 }

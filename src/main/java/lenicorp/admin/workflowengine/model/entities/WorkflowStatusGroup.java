@@ -27,7 +27,10 @@ public class WorkflowStatusGroup {
 
     private String color;
 
+    private Integer ordre;
+
     @ManyToMany(mappedBy = "groups")
+    @OrderBy("ordre ASC")
     private List<WorkflowStatus> statuses;
 
     @ManyToMany
