@@ -1,17 +1,21 @@
 package lenicorp.metier.workflowadapters;
 
 import lenicorp.admin.workflowengine.engine.adapter.ObjectAdapter;
+import lenicorp.admin.workflowengine.model.dtos.InfoFieldDTO;
+import lenicorp.metier.association.controller.repositories.DemandeAdhesionRepository;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 public class DemandeAdhesionAdapter implements ObjectAdapter<DemandeAdhesion> {
-    private final lenicorp.metier.association.controller.repositories.DemandeAdhesionRepository repository;
+    private final DemandeAdhesionRepository repository;
 
     @Override
     public Class<DemandeAdhesion> targetType() {
@@ -36,8 +40,6 @@ public class DemandeAdhesionAdapter implements ObjectAdapter<DemandeAdhesion> {
     public Map<String, Object> toRuleMap(DemandeAdhesion obj) {
         Map<String, Object> facts = new HashMap<>();
         facts.put("droitAdhesion", obj.getAssociation() != null ? obj.getAssociation().getDroitAdhesion() : null);
-        facts.put("montant", obj.getMontantCotisationEstime());
-        facts.put("reference", obj.getReference());
         facts.put("association", obj.getAssociation() != null ? obj.getAssociation().getAssoName() : null);
         facts.put("section", obj.getSection() != null ? obj.getSection().getSectionName() : null);
         facts.put("accepteCharte", obj.getAccepteCharte());
@@ -66,5 +68,25 @@ public class DemandeAdhesionAdapter implements ObjectAdapter<DemandeAdhesion> {
     @Override
     public String getId(DemandeAdhesion obj) {
         return obj.getDemandeId() != null ? obj.getDemandeId().toString() : null;
+    }
+
+    @Override
+    public List<InfoFieldDTO> getGeneralInfo(DemandeAdhesion obj) {
+        List<InfoFieldDTO> fields = new ArrayList<>();
+        if (obj.getDemandeur() != null) {
+            fields.add(new InfoFieldDTO("Demandeur", obj.getDemandeur().getFirstName() + " " + obj.getDemandeur().getLastName(), null));
+        }
+        if (obj.getAssociation() != null) {
+            fields.add(new InfoFieldDTO("Association", obj.getAssociation().getAssoName(), null));
+        }
+        if (obj.getSection() != null) {
+            fields.add(new InfoFieldDTO("Section", obj.getSection().getSectionName(), null));
+        }
+        fields.add(new InfoFieldDTO("Date Soumission", obj.getDateSoumission(), null));
+
+        if (obj.getStatut() != null) {
+            fields.add(new InfoFieldDTO("Statut Actuel", obj.getStatut().name, null));
+        }
+        return fields;
     }
 }
