@@ -87,7 +87,7 @@ public class UserController
     }
 
     @Validated(ActivateAccountGroup.class)
-    @PutMapping(value = "/activate", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/open/activate", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public void activateAccount(@Valid @RequestBody UserDTO user)
     {
         userService.activateAccount(user);

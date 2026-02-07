@@ -30,6 +30,8 @@ public class AppUser extends AuditableEntity
     private String firstName;
     private String lastName;
     private String tel;
+    @Column(length = 20)
+    private String codeCivilite;
     @ManyToOne @JoinColumn(name = "grade_code") @NotAudited
     private Type grade;
     @Column() @NotAudited

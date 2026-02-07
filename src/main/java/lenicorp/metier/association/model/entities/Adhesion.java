@@ -2,6 +2,7 @@ package lenicorp.metier.association.model.entities;
 
 import jakarta.persistence.*;
 import lenicorp.admin.security.audit.AuditableEntity;
+import lenicorp.admin.types.model.entities.Type;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +25,11 @@ public class Adhesion extends AuditableEntity
     @ManyToOne
     @JoinColumn(name = "SECTION_ID")
     private Section section;
+
+    @ManyToOne
+    @JoinColumn(name = "STATUT_CODE")
+    private Type statut;
+
     private boolean active;
     private String userId;
 

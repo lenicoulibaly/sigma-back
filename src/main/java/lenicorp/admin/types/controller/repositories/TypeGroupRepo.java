@@ -59,7 +59,7 @@ public interface TypeGroupRepo extends JpaRepository<TypeGroup, String> {
     List<TypeGroup> searchTypeGroupsByKey(@Param("key") String key);
     
     /**
-     * Count type groups matching the search key
+     * Count type groups matching the searchAccessible key
      */
     @Query(value = "SELECT COUNT(*) FROM Type_Group tg WHERE unaccent(UPPER(tg.group_code)) LIKE CONCAT('%', unaccent(UPPER(:key)), '%') OR unaccent(UPPER(tg.name)) LIKE CONCAT('%', unaccent(UPPER(:key)), '%')", 
            nativeQuery = true)

@@ -41,7 +41,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long>
 
     /**
      * Find documents by name containing the given text (case insensitive)
-     * @param name the name to search for
+     * @param name the name to searchAccessible for
      * @return list of documents
      */
     @Query("SELECT d FROM Document d WHERE LOWER(d.docName) LIKE LOWER(CONCAT('%', :name, '%'))")

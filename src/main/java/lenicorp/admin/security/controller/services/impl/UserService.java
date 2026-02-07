@@ -158,7 +158,7 @@ public class UserService implements IUserService
         AuthToken authToken = this.generateAuthToken(userId);
         AppUser user = userRepo.findById(userId).orElseThrow(() -> new AppException("Utilisateur introuvable"));
         if(user == null) return;
-        mailService.envoyerEmailActivation(user.getEmail(), user.getLastName(), "/activate-account?token=" + authToken.getToken()).exceptionally(throwable ->
+        mailService.envoyerEmailActivation(user.getEmail(), user.getLastName(), frontAddress + "/activate-account?token=" + authToken.getToken() + "&userId=" + userId).exceptionally(throwable ->
         {
             throwable.printStackTrace();
             throw new AppException(throwable.getMessage());

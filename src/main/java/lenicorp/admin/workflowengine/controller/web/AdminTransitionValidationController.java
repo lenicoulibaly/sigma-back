@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin/transition-validations")
+@RequestMapping("/transition-validations")
 @RequiredArgsConstructor
 public class AdminTransitionValidationController {
     private final AdminTransitionValidationService service;
