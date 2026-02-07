@@ -1,6 +1,7 @@
 package lenicorp.metier.association.controller.repositories;
 
 import lenicorp.metier.association.model.dtos.DemandeAdhesionDTO;
+import lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,33 +18,94 @@ public interface DemandeAdhesionRepository extends JpaRepository<DemandeAdhesion
     @Query("""
             SELECT new lenicorp.metier.association.model.dtos.DemandeAdhesionDTO(
                 d.demandeId,
-                d.reference,
                 d.association.assoId,
                 d.association.assoName,
-                d.section.sectionId,
-                d.section.sectionName,
+                s.sectionId,
+                s.sectionName,
                 d.demandeur.userId,
-                d.demandeur.firstName,
+                concat(d.demandeur.firstName, ' ', d.demandeur.lastName) ,
                 d.statut.code,
                 d.statut.name,
+                ws.color,
+                ws.icon,
                 d.dateSoumission,
                 d.dateDecision,
+                d.createdAt,
                 d.motifRefus,
                 d.accepteCharte,
                 d.accepteRgpd,
                 d.accepteStatutsReglements,
-                d.message,
-                d.montantCotisationEstime
+                d.message
             )
-            FROM DemandeAdhesion d
-            WHERE (:key IS NULL 
-                OR UPPER(FUNCTION('unaccent', d.reference)) LIKE :key
+            FROM DemandeAdhesion d left join d.section s
+            left join WorkflowStatus ws on (ws.status.code = d.statut.code AND ws.workflow.code = 'DMD_ADH')
+            WHERE (:associationId IS NULL OR d.association.assoId = :associationId)
+            AND (:userId IS NULL OR d.demandeur.userId = :userId)
+            AND (:key IS NULL 
                 OR UPPER(FUNCTION('unaccent', d.association.assoName)) LIKE :key
                 OR UPPER(FUNCTION('unaccent', d.demandeur.firstName)) LIKE :key
                 OR UPPER(FUNCTION('unaccent', d.demandeur.lastName)) LIKE :key)
             AND (:statusCodes IS NULL OR d.statut.code IN :statusCodes)
             """)
-    Page<DemandeAdhesionDTO> search(@Param("key") String key, 
+    Page<DemandeAdhesionDTO> search(@Param("associationId") Long associationId,
+                                    @Param("userId") Long userId,
+                                    @Param("key") String key, 
                                     @Param("statusCodes") List<String> statusCodes, 
                                     Pageable pageable);
+
+    @Query(value = """
+            SELECT new lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO(
+                d.demandeId,
+                d.association.assoId,
+                d.section.sectionId,
+                d.demandeur.userId,
+                CONCAT(COALESCE(d.demandeur.firstName,''),' ',COALESCE(d.demandeur.lastName,'')),
+                d.statut.code,
+                d.statut.name,
+                ws.color,
+                ws.icon,
+                d.message,
+                d.dateSoumission,
+                d.dateDecision,
+                d.createdAt,
+                CAST(NULL as string),
+                d.adhesionCreee.adhesionId
+            )
+            FROM DemandeAdhesion d
+            LEFT JOIN WorkflowStatus ws ON (ws.status.code = d.statut.code AND ws.workflow.code = 'DMD_ADH')
+            WHERE (:userId IS NULL OR d.demandeur.userId = :userId)
+              AND (COALESCE(:assoIds, NULL) IS NULL OR d.association.assoId IN (:assoIds))
+              AND (
+                :key IS NULL OR :key = '' OR
+                UPPER(FUNCTION('unaccent', COALESCE(d.demandeur.firstName, ''))) LIKE CONCAT('%', :key, '%') OR
+                UPPER(FUNCTION('unaccent', COALESCE(d.demandeur.lastName, ''))) LIKE CONCAT('%', :key, '%') OR
+                UPPER(FUNCTION('unaccent', COALESCE(d.demandeur.email, ''))) LIKE CONCAT('%', :key, '%')
+              )
+              AND (
+                :hasStatusFilter = false OR d.statut.code IN (:statutCodes)
+              )
+            ORDER BY d.dateSoumission DESC
+            """,
+            countQuery = """
+            SELECT COUNT(d)
+            FROM DemandeAdhesion d
+            WHERE (:userId IS NULL OR d.demandeur.userId = :userId)
+              AND (COALESCE(:assoIds, NULL) IS NULL OR d.association.assoId IN (:assoIds))
+              AND (
+                :key IS NULL OR :key = '' OR
+                UPPER(FUNCTION('unaccent', COALESCE(d.demandeur.firstName, ''))) LIKE CONCAT('%', :key, '%') OR
+                UPPER(FUNCTION('unaccent', COALESCE(d.demandeur.lastName, ''))) LIKE CONCAT('%', :key, '%') OR
+                UPPER(FUNCTION('unaccent', COALESCE(d.demandeur.email, ''))) LIKE CONCAT('%', :key, '%')
+              )
+              AND (
+                :hasStatusFilter = false OR d.statut.code IN (:statutCodes)
+              )
+            """)
+    Page<ReadDemandeAdhesionDTO> searchForUser(
+            @Param("userId") Long userId,
+            @Param("key") String key,
+            @Param("assoIds") List<Long> assoIds,
+            @Param("statutCodes") List<String> statutCodes,
+            @Param("hasStatusFilter") boolean hasStatusFilter,
+            Pageable pageable);
 }

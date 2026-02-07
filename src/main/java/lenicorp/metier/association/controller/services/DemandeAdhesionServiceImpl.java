@@ -1,5 +1,11 @@
 package lenicorp.metier.association.controller.services;
 
+import lenicorp.admin.archive.controller.service.IDocumentService;
+import lenicorp.admin.archive.model.dtos.request.UploadDocReq;
+import lenicorp.admin.exceptions.AppException;
+import lenicorp.admin.security.controller.repositories.UserRepo;
+import lenicorp.admin.security.model.entities.AppUser;
+import lenicorp.admin.structures.model.entities.Structure;
 import lenicorp.admin.utilities.StringUtils;
 import lenicorp.admin.workflowengine.controller.repositories.WorkflowStatusGroupRepository;
 import lenicorp.admin.workflowengine.controller.repositories.WorkflowStatusRepository;
@@ -7,6 +13,8 @@ import lenicorp.admin.workflowengine.engine.registry.WorkflowRegistry;
 import lenicorp.admin.workflowengine.execution.service.WorkflowTransitionLogService;
 import lenicorp.metier.association.controller.repositories.DemandeAdhesionRepository;
 import lenicorp.metier.association.model.dtos.DemandeAdhesionDTO;
+import lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO;
+import lenicorp.metier.association.model.dtos.UserDemandeAdhesionDTO;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
 import lenicorp.metier.association.model.mappers.DemandeAdhesionMapper;
 import lenicorp.admin.types.model.entities.Type;
@@ -17,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -31,6 +40,8 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService
     private final WorkflowStatusRepository statusRepository;
     private final WorkflowTransitionLogService logService;
     private final DemandeAdhesionMapper mapper;
+    private final UserRepo userRepo;
+    private final IDocumentService documentService;
 
     @Override
     @Transactional
@@ -49,6 +60,19 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService
         entity.setStatut(new Type(startStatusCode));
 
         entity = repository.save(entity);
+
+        // Upload des documents si présents
+        if (dto.getDocuments() != null && !dto.getDocuments().isEmpty()) {
+            for (UploadDocReq docReq : dto.getDocuments()) {
+                docReq.setObjectId(entity.getDemandeId());
+                docReq.setObjectTableName("DEMANDE_ADHESION");
+                try {
+                    documentService.uploadDocument(docReq);
+                } catch (java.io.IOException e) {
+                    throw new AppException("Erreur lors de l'upload d'un document : " + e.getMessage());
+                }
+            }
+        }
 
         // Log de l'initialisation du workflow
         logService.logTransition(
@@ -69,6 +93,45 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService
 
     @Override
     @Transactional
+    public DemandeAdhesionDTO createUserAndDemandeAdhesion(UserDemandeAdhesionDTO dto)
+    {
+        if(userRepo.existsByEmail(dto.getEmail())) throw new AppException("Email déjà attribué " + dto.getEmail());
+        if(userRepo.existsByTel(dto.getTel())) throw new AppException("N° téléphone déjà attribué " + dto.getTel());
+        if(userRepo.existsByMatricule(dto.getMatricule())) throw new AppException("Matricule déjà attribué " + dto.getMatricule());
+        if(dto.getAssoId() == null) throw new AppException("Veuillez sélectionner l'association");
+
+        // Create user
+        AppUser user = new AppUser();
+        user.setEmail(dto.getEmail());
+        user.setMatricule(dto.getMatricule());
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setTel(dto.getTel());
+        user.setLieuNaissance(dto.getLieuNaissance());
+        user.setDateNaissance(dto.getDateNaissance());
+        user.setCodeCivilite(dto.getCodeCivilite());
+        user.setGrade(dto.getGradeCode() == null ? null : new Type(dto.getGradeCode()));
+        user.setIndice(dto.getIndice());
+        user.setEmploi(dto.getEmploiCode() == null ? null : new Type(dto.getEmploiCode()));
+        user.setStructure(dto.getStrId() == null ? null : new Structure(dto.getStrId()));
+        user = userRepo.save(user);
+
+        // Monter DemandeAdhesionDTO
+        DemandeAdhesionDTO demandeDTO = new DemandeAdhesionDTO();
+        demandeDTO.setAssoId(dto.getAssoId());
+        demandeDTO.setSectionId(dto.getSectionId());
+        demandeDTO.setDemandeurId(user.getUserId());
+        demandeDTO.setAccepteCharte(dto.getAccepteCharte());
+        demandeDTO.setAccepteRgpd(dto.getAccepteRgpd());
+        demandeDTO.setAccepteStatutsReglements(dto.getAccepteStatutsReglements());
+        demandeDTO.setMessage(dto.getMessage());
+        demandeDTO.setDocuments(dto.getDocuments());
+
+        return this.create(demandeDTO);
+    }
+
+    @Override
+    @Transactional
     public DemandeAdhesionDTO update(Long id, DemandeAdhesionDTO dto)
     {
         DemandeAdhesion entity = repository.findById(id)
@@ -82,7 +145,7 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService
     }
 
     @Override
-    public Page<DemandeAdhesionDTO> search(String key, String workflowStatusGroupCode, Pageable pageable) {
+    public Page<DemandeAdhesionDTO> search(Long associationId, Long userId, String key, String workflowStatusGroupCode, Pageable pageable) {
         String normalizedKey = key == null ? null : "%" + StringUtils.stripAccentsToUpperCase(key) + "%";
         List<String> statusCodes = null;
 
@@ -95,7 +158,25 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService
             }
         }
 
-        return repository.search(normalizedKey, statusCodes, pageable);
+        return repository.search(associationId, userId, normalizedKey, statusCodes, pageable);
+    }
+
+    @Override
+    public Page<ReadDemandeAdhesionDTO> searchForUser(Long userId, String key, List<Long> assoIds, List<String> workflowStatusGroupCodes, Pageable pageable) {
+        List<String> statusCodes = new ArrayList<>();
+        boolean hasStatusFilter = false;
+
+        if (workflowStatusGroupCodes != null && !workflowStatusGroupCodes.isEmpty()) {
+            hasStatusFilter = true;
+            for (String groupCode : workflowStatusGroupCodes) {
+                statusCodes.addAll(statusGroupRepository.findStatusCodesByGroupCode(groupCode));
+            }
+            if (statusCodes.isEmpty()) {
+                statusCodes.add("__NONE__");
+            }
+        }
+
+        return repository.searchForUser(userId, key, assoIds, statusCodes, hasStatusFilter, pageable);
     }
 
     private DemandeAdhesionDTO toDto(DemandeAdhesion d) {
