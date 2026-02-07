@@ -11,5 +11,7 @@ public interface WorkflowStatusGroupService {
     WorkflowStatusGroupDTO update(Long id, WorkflowStatusGroupDTO dto);
     void delete(Long id);
     Page<WorkflowStatusGroupDTO> search(String key, Long workflowId, Pageable pageable);
+    List<WorkflowStatusGroupDTO> getAccessibleWorkflowStatusGroupByWorkflowCode(String workflowCode);
     List<String> getAuthorityCodes(Long id);
+    boolean isStatusVisibleByGroup(String groupCode, String statusCode);
 }

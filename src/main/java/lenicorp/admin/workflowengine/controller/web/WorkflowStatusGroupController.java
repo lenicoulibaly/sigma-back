@@ -26,6 +26,12 @@ public class WorkflowStatusGroupController {
     ) {
         return service.search(key, workflowId, PageRequest.of(page, size));
     }
+
+    @GetMapping("/accessible-list/{workflowCode}")
+    public List<WorkflowStatusGroupDTO> getAccessibleWorkflowStatusGroupByWorkflowCode(
+            @PathVariable(required = true) String workflowCode)
+    {
+        return service.getAccessibleWorkflowStatusGroupByWorkflowCode(workflowCode);
     }
 
     @PostMapping
@@ -46,5 +52,12 @@ public class WorkflowStatusGroupController {
     @GetMapping("/{id}/authority-codes")
     public List<String> getAuthorityCodes(@PathVariable Long id) {
         return service.getAuthorityCodes(id);
+    }
+
+    @GetMapping("/is-status-visible")
+    public boolean isStatusVisibleByGroup(
+            @RequestParam("groupCode") String groupCode,
+            @RequestParam("statusCode") String statusCode) {
+        return service.isStatusVisibleByGroup(groupCode, statusCode);
     }
 }

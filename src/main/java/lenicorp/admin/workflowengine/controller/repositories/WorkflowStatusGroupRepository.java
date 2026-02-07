@@ -69,4 +69,12 @@ public interface WorkflowStatusGroupRepository extends JpaRepository<WorkflowSta
 
     @Query("SELECT ws.status.code FROM WorkflowStatusGroup wsg JOIN wsg.statuses ws WHERE wsg.code = :groupCode")
     List<String> findStatusCodesByGroupCode(@Param("groupCode") String groupCode);
+
+    @Query("""
+            SELECT CASE WHEN COUNT(ws) > 0 THEN true ELSE false END
+            FROM WorkflowStatus ws
+            JOIN ws.groups g
+            WHERE g.code = :groupCode AND ws.status.code = :statusCode
+            """)
+    boolean isStatusVisibleByGroup(@Param("groupCode") String groupCode, @Param("statusCode") String statusCode);
 }

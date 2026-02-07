@@ -175,4 +175,9 @@ public class WorkflowStatusGroupServiceImpl implements WorkflowStatusGroupServic
         
         return new java.util.ArrayList<>(authorityCodes);
     }
+
+    @Override
+    public boolean isStatusVisibleByGroup(String groupCode, String statusCode) {
+        return repository.isStatusVisibleByGroup(groupCode, statusCode);
+    }
 }
