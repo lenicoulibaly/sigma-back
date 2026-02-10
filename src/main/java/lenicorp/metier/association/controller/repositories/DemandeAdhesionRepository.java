@@ -57,6 +57,7 @@ public interface DemandeAdhesionRepository extends JpaRepository<DemandeAdhesion
             SELECT new lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO(
                 d.demandeId,
                 d.association.assoId,
+                d.association.assoName,
                 d.section.sectionId,
                 d.demandeur.userId,
                 CONCAT(COALESCE(d.demandeur.firstName,''),' ',COALESCE(d.demandeur.lastName,'')),

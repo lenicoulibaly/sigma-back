@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public record ReadDemandeAdhesionDTO(
         Long demandeId,
         Long assoId,
+        String assoName,
         Long sectionId,
         Long userId,
         String userFullName,

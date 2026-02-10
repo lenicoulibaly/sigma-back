@@ -23,6 +23,7 @@ public interface DemandeAdhesionRepo extends JpaRepository<DemandeAdhesion, Long
             SELECT new lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO(
                 d.demandeId,
                 d.association.assoId,
+                d.association.assoName,
                 d.section.sectionId,
                 d.demandeur.userId,
                 CONCAT(COALESCE(d.demandeur.firstName,''),' ',COALESCE(d.demandeur.lastName,'')),
@@ -76,6 +77,7 @@ public interface DemandeAdhesionRepo extends JpaRepository<DemandeAdhesion, Long
             SELECT new lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO(
                 d.demandeId,
                 d.association.assoId,
+                d.association.assoName,
                 d.section.sectionId,
                 d.demandeur.userId,
                 CONCAT(COALESCE(d.demandeur.firstName,''),' ',COALESCE(d.demandeur.lastName,'')),
