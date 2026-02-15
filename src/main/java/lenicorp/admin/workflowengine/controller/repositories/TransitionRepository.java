@@ -34,10 +34,14 @@ public interface TransitionRepository extends JpaRepository<Transition, Long> {
                 LOWER(COALESCE(so.code, '')) LIKE LOWER(CONCAT('%', :key, '%')) OR
                 LOWER(COALESCE(sd.code, '')) LIKE LOWER(CONCAT('%', :key, '%'))
               )
+          AND (:originStatusCodes IS NULL OR so.code IN :originStatusCodes)
+          AND (:destinationStatusCodes IS NULL OR sd.code IN :destinationStatusCodes)
         ORDER BY t.ordre ASC
     """)
     Page<TransitionDTO> searchByWorkflow(@Param("workflowId") Long workflowId,
                                          @Param("key") String key,
+                                         @Param("originStatusCodes") List<String> originStatusCodes,
+                                         @Param("destinationStatusCodes") List<String> destinationStatusCodes,
                                          Pageable pageable);
 
     @Query("""

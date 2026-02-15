@@ -14,7 +14,7 @@ public interface AdminTransitionService {
     TransitionDTO update(Long transitionId, TransitionDTO dto);
     void delete(Long transitionId);
     List<TransitionDTO> listByWorkflow(Long workflowId);
-    Page<TransitionDTO> searchByWorkflow(Long workflowId, String key, Pageable pageable);
+    Page<TransitionDTO> searchByWorkflow(Long workflowId, String key, List<String> originStatusCodes, List<String> destinationStatusCodes, Pageable pageable);
     void reorder(List<Map<String, Object>> items);
     String testNextStatus(Long transitionId, Map<String, Object> facts);
 }

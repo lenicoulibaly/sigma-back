@@ -64,10 +64,12 @@ public class WorkflowTransitionController
     public Page<TransitionDTO> searchTransitionsByWorkflow(
             @PathVariable Long workflowId,
             @RequestParam(value = "key", required = false, defaultValue = "") String key,
+            @RequestParam(value = "originStatusCodes", required = false) List<String> originStatusCodes,
+            @RequestParam(value = "destinationStatusCodes", required = false) List<String> destinationStatusCodes,
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size)
     {
-        return service.searchByWorkflow(workflowId, key, PageRequest.of(page, size));
+        return service.searchByWorkflow(workflowId, key, originStatusCodes, destinationStatusCodes, PageRequest.of(page, size));
     }
 
     @PostMapping("/reorder")

@@ -16,6 +16,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,6 +46,8 @@ public class AdminTransitionServiceTest {
     private TransitionMapper mapper;
     @Mock
     private AuthorityRepo authorityRepo;
+    @Mock
+    private lenicorp.admin.workflowengine.controller.repositories.TransitionValidationConfigRepository transitionValidationRepo;
 
     @InjectMocks
     private AdminTransitionServiceImpl adminTransitionService;
@@ -132,5 +141,23 @@ public class AdminTransitionServiceTest {
 
         assertEquals(transition, config.getTransition());
         verify(transitionRepo).save(transition);
+    }
+
+    @Test
+    void searchByWorkflow_ShouldPassParametersToRepo() {
+        Long workflowId = 1L;
+        String key = "test";
+        List<String> origins = List.of("S1");
+        List<String> destinations = List.of("S2");
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<TransitionDTO> expectedPage = new PageImpl<>(Collections.emptyList());
+
+        when(transitionRepo.searchByWorkflow(eq(workflowId), eq(key), eq(origins), eq(destinations), eq(pageable)))
+                .thenReturn(expectedPage);
+
+        Page<TransitionDTO> result = adminTransitionService.searchByWorkflow(workflowId, key, origins, destinations, pageable);
+
+        assertEquals(expectedPage, result);
+        verify(transitionRepo).searchByWorkflow(workflowId, key, origins, destinations, pageable);
     }
 }

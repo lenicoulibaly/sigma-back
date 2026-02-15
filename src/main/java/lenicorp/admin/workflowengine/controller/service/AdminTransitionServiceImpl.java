@@ -1,6 +1,7 @@
 package lenicorp.admin.workflowengine.controller.service;
 
 import lenicorp.admin.security.controller.repositories.AuthorityRepo;
+import lenicorp.admin.utilities.StringUtils;
 import lenicorp.admin.workflowengine.controller.repositories.TransitionValidationConfigRepository;
 import lenicorp.admin.workflowengine.model.entities.TransitionValidationConfig;
 import lenicorp.admin.workflowengine.model.dtos.TransitionDTO;
@@ -115,9 +116,11 @@ public class AdminTransitionServiceImpl implements AdminTransitionService {
     }
 
     @Override
-    public Page<TransitionDTO> searchByWorkflow(Long workflowId, String key, Pageable pageable) {
-        String k = key == null ? "" : key.trim();
-        Page<TransitionDTO> page = transitionRepo.searchByWorkflow(workflowId, k, pageable);
+    public Page<TransitionDTO> searchByWorkflow(Long workflowId, String key, List<String> originStatusCodes, List<String> destinationStatusCodes, Pageable pageable) {
+        String k = StringUtils.stripAccentsToLowerCase(key);
+        List<String> origins = originStatusCodes == null || originStatusCodes.isEmpty() ? null : originStatusCodes;
+        List<String> destinations = destinationStatusCodes == null || destinationStatusCodes.isEmpty() ? null : destinationStatusCodes;
+        Page<TransitionDTO> page = transitionRepo.searchByWorkflow(workflowId, k, origins, destinations, pageable);
         page.getContent().forEach(dto -> {
             TransitionValidationConfig vc = transitionValidationRepo.findById(dto.getTransitionId()).orElse(null);
             if (vc != null) {
