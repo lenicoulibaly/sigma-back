@@ -21,12 +21,13 @@ public class TransitionDTO
     private String defaultStatutDestinationName;
     private Long workflowId;
     private Boolean active = true;
+    private Boolean visible = true;
 
     private boolean commentRequired = false;
     private List<String> requiredDocTypeCodes;
     private List<SideEffectDTO> sideEffects;
 
-    public TransitionDTO(Long transitionId, String privilegeCode, String libelle, String color, String icon, Integer ordre, String statutOrigineCode, String statutOrigineName, String defaultStatutDestinationCode, String defaultStatutDestinationName, Long workflowId, Boolean active, boolean commentRequired) {
+    public TransitionDTO(Long transitionId, String privilegeCode, String libelle, String color, String icon, Integer ordre, String statutOrigineCode, String statutOrigineName, String defaultStatutDestinationCode, String defaultStatutDestinationName, Long workflowId, Boolean active, Boolean visible, boolean commentRequired) {
         this.transitionId = transitionId;
         this.privilegeCode = privilegeCode;
         this.libelle = libelle;
@@ -39,6 +40,7 @@ public class TransitionDTO
         this.defaultStatutDestinationName = defaultStatutDestinationName;
         this.workflowId = workflowId;
         this.active = active;
+        this.visible = visible;
         this.commentRequired = commentRequired;
     }
 }

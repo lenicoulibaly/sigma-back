@@ -8,12 +8,14 @@ import lenicorp.admin.workflowengine.outbox.model.payload.OutboxAction;
 import lenicorp.admin.workflowengine.outbox.model.payload.TransitionAppliedPayload;
 import lenicorp.admin.workflowengine.outbox.repo.OutboxEventRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -26,6 +28,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Component
 @EnableScheduling
 @RequiredArgsConstructor
+@Slf4j
 public class OutboxDispatcher {
     private final OutboxEventRepository outboxRepo;
     private final ActionExecutorRegistry registry;
@@ -43,7 +46,6 @@ public class OutboxDispatcher {
     private int maxAttempts;
 
     @Scheduled(fixedDelayString = "${outbox.dispatch.fixed-delay:1000}")
-    @Transactional
     public void dispatch() {
         Instant now = Instant.now();
         List<OutboxEvent> batch = outboxRepo.findReadyBatch(OutboxStatus.NEW, OutboxStatus.RETRY, now, PageRequest.of(0, batchSize));
@@ -51,23 +53,32 @@ public class OutboxDispatcher {
 
         for (OutboxEvent evt : batch) {
             try {
-                evt.markProcessing();
-                outboxRepo.save(evt);
-
-                handleEvent(evt);
-
-                evt.markSent();
-                outboxRepo.save(evt);
-            } catch (Exception ex) {
-                int attempts = evt.getAttempts() + 1;
-                if (attempts >= maxAttempts || isNonRetryable(ex)) {
-                    evt.markDead(shortMsg(ex));
-                } else {
-                    Duration backoff = backoff(attempts);
-                    evt.scheduleRetry(now.plus(backoff), shortMsg(ex), attempts);
-                }
-                outboxRepo.save(evt);
+                applicationContext.getBean(OutboxDispatcher.class).processEvent(evt, now);
+            } catch (Exception e) {
+                log.error("Failed to process outbox event {}: {}", evt.getId(), e.getMessage());
             }
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void processEvent(OutboxEvent evt, Instant now) {
+        try {
+            evt.markProcessing();
+            outboxRepo.save(evt);
+
+            handleEvent(evt);
+
+            evt.markSent();
+            outboxRepo.save(evt);
+        } catch (Exception ex) {
+            int attempts = evt.getAttempts() + 1;
+            if (attempts >= maxAttempts || isNonRetryable(ex)) {
+                evt.markDead(shortMsg(ex));
+            } else {
+                Duration backoff = backoff(attempts);
+                evt.scheduleRetry(now.plus(backoff), shortMsg(ex), attempts);
+            }
+            outboxRepo.save(evt);
         }
     }
 
@@ -79,7 +90,7 @@ public class OutboxDispatcher {
         TransitionAppliedPayload payload = objectMapper.readValue(evt.getPayload(), TransitionAppliedPayload.class);
         Map<String, Object> eventMap = new HashMap<>();
         eventMap.put("workflowCode", payload.getWorkflowCode());
-        eventMap.put("transitionCode", payload.getTransitionCode());
+        eventMap.put("transitionCode", payload.getTransitionCode()); eventMap.put("transitionId", payload.getTransitionId());
         eventMap.put("objectType", payload.getObjectType());
         eventMap.put("objectId", payload.getObjectId());
         eventMap.put("fromStatus", payload.getFromStatus());

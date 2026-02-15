@@ -1,6 +1,7 @@
 package lenicorp.admin.workflowengine.outbox.service.impl;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import lenicorp.admin.workflowengine.outbox.model.entities.OutboxActionLog;
 import lenicorp.admin.workflowengine.outbox.repo.OutboxActionLogRepository;
 import lenicorp.admin.workflowengine.outbox.service.DedupService;
@@ -14,7 +15,7 @@ public class JpaDedupService implements DedupService {
     private final OutboxActionLogRepository repo;
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean runOnce(String dedupKey, String name, Runnable runnable) {
         try {
             // Try to reserve the key
@@ -22,7 +23,7 @@ public class JpaDedupService implements DedupService {
             log.setDedupKey(dedupKey);
             log.setName(name);
             log.setStatus("RESERVED");
-            repo.save(log);
+            repo.saveAndFlush(log);
         } catch (DataIntegrityViolationException e) {
             // Already exists => consider action already executed (or in progress)
             return false;

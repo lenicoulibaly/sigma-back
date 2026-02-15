@@ -13,6 +13,7 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransitionAppliedPayload {
     private String workflowCode;
+    private Long transitionId;
     private String transitionCode;
     private String objectType;
     private String objectId;

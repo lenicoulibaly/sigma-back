@@ -17,7 +17,7 @@ public interface TransitionRepository extends JpaRepository<Transition, Long> {
             t.transitionId, p.code, t.libelle, t.color, t.icon, t.ordre, 
             so.code, so.name, 
             sd.code, sd.name, 
-            t.workflow.id, t.active,
+            t.workflow.id, t.active, t.visible,
             COALESCE(vc.commentRequired, false)
         )
         FROM Transition t
@@ -45,7 +45,7 @@ public interface TransitionRepository extends JpaRepository<Transition, Long> {
             t.transitionId, p.code, t.libelle, t.color, t.icon, t.ordre, 
             so.code, so.name, 
             sd.code, sd.name, 
-            t.workflow.id, t.active,
+            t.workflow.id, t.active, t.visible,
             COALESCE(vc.commentRequired, false)
         )
         FROM Transition t

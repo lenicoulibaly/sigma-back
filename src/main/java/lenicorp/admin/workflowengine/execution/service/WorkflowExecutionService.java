@@ -18,7 +18,7 @@ public interface WorkflowExecutionService {
             List<String> fileTypes
     );
 
-    List<TransitionDTO> getAvailableTransitions(String workflowCode, String objectType, String objectId);
+    List<TransitionDTO> getAvailableTransitions(String workflowCode, String objectType, String objectId, boolean onlyVisible);
 
     List<String> getAvailableObjectTypes();
 }

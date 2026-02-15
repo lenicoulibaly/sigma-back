@@ -53,5 +53,9 @@ public class Transition extends AuditableEntity {
     @OrderBy("ordre ASC")
     private List<TransitionSideEffect> sideEffects;
 
+    @Column(nullable = false, columnDefinition = "boolean default true")
     private Boolean active = true;
+
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private Boolean visible = true;
 }

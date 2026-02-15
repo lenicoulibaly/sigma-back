@@ -29,7 +29,7 @@ public class OutboxService {
         evt.setEventType("TransitionApplied");
         evt.setPayload(json);
         evt.setHeaders(toJson(Map.of("workflowCode", payload.getWorkflowCode(),
-                "transitionCode", payload.getTransitionCode())));
+                "transitionCode", payload.getTransitionCode(), "transitionId", payload.getTransitionId())));
         evt.setStatus(OutboxStatus.NEW);
         outboxRepo.save(evt);
         return evt.getId();

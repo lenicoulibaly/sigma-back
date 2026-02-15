@@ -10,6 +10,7 @@ import lenicorp.admin.workflowengine.engine.adapter.ObjectAdapterRegistry;
 import lenicorp.admin.workflowengine.engine.rules.RuleEvaluationService;
 import lenicorp.admin.workflowengine.execution.archive.ArchiveGateway;
 import lenicorp.admin.workflowengine.execution.dto.AttachmentRef;
+import lenicorp.admin.workflowengine.execution.model.WorkflowTransitionLog;
 import lenicorp.admin.workflowengine.model.dtos.ExecuteTransitionRequestDTO;
 import lenicorp.admin.workflowengine.model.dtos.ExecuteTransitionResponseDTO;
 import lenicorp.admin.workflowengine.model.dtos.TransitionDTO;
@@ -78,6 +79,13 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
 
         String from = adapter.getCurrentStatus(aggregate);
 
+        // Ensure transition is available for current status and active
+        List<TransitionDTO> availableTransitions = this.getAvailableTransitions(workflowCode, objectType, objectId, false);
+        boolean isAvailable = availableTransitions.stream().anyMatch(t -> t.getTransitionId().equals(transitionId));
+        if (!isAvailable) {
+            throw new IllegalStateException(String.format("La transition %s n'est pas disponible pour l'objet %s (type: %s, statut: %s)", transitionId, objectId, objectType, from));
+        }
+
         // Evaluate Rules
         Map<String, Object> facts = adapter.toRuleMap(aggregate);
         var rules = ruleRepo.findActiveRulesByTransitionId(transitionId);
@@ -90,7 +98,6 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         if (to == null) {
             throw new IllegalStateException("Could not determine destination status for transition " + transitionId);
         }
-
         // Apply transition
         adapter.setStatus(aggregate, to);
         adapter.save(aggregate);
@@ -114,9 +121,11 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         );
 
         // Enqueue side effects in Outbox
-        if (transition.getSideEffects() != null && !transition.getSideEffects().isEmpty()) {
+        if (transition.getSideEffects() != null && !transition.getSideEffects().isEmpty()) 
+        {
             TransitionAppliedPayload payload = new TransitionAppliedPayload();
             payload.setWorkflowCode(workflowCode);
+            payload.setTransitionId(transitionId);
             payload.setTransitionCode(transition.getLibelle());
             payload.setObjectType(objectType);
             payload.setObjectId(objectId);
@@ -129,7 +138,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
                         OutboxAction action = new OutboxAction();
                         action.setName(se.getName());
                         action.setActionType(se.getActionType());
-                        action.setDedupKey(workflowCode + ":" + objectType + ":" + objectId + ":" + transitionId + ":" + se.getId());
+                        action.setDedupKey(workflowCode + ":" + objectType + ":" + objectId + ":" + transitionId + ":" + transitionLog.getId() + ":" + se.getId());
                         try {
                             if (se.getActionConfig() != null && !se.getActionConfig().isBlank()) {
                                 action.setConfig(objectMapper.readValue(se.getActionConfig(), Map.class));
@@ -148,7 +157,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
     }
 
     @Override
-    public List<TransitionDTO> getAvailableTransitions(String workflowCode, String objectType, String objectId) {
+    public List<TransitionDTO> getAvailableTransitions(String workflowCode, String objectType, String objectId, boolean onlyVisible) {
         ObjectAdapter adapter = adapterRegistry.adapterFor(objectType);
         Object aggregate = adapter.load(objectId);
         if (aggregate == null) {
@@ -159,6 +168,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
 
         List<TransitionDTO> transitions = transitionRepo.findAvailableTransitions(workflowCode, currentStatus);
         return transitions.stream()
+                .filter(t -> !onlyVisible || Boolean.TRUE.equals(t.getVisible()))
                 .filter(t -> t.getPrivilegeCode() == null || jwtService.hasPrivilege(t.getPrivilegeCode()))
                 .collect(Collectors.toList());
     }
