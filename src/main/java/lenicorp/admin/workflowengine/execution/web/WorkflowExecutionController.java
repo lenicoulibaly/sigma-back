@@ -39,7 +39,7 @@ public class WorkflowExecutionController {
             @PathVariable String objectId
     ) {
         try {
-            return ResponseEntity.ok(workflowExecutionService.getAvailableTransitions(workflowCode, objectType, objectId));
+            return ResponseEntity.ok(workflowExecutionService.getAvailableTransitions(workflowCode, objectType, objectId, false));
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
@@ -82,6 +82,14 @@ public class WorkflowExecutionController {
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(workflowTransitionLogService.getHistory(objectType, objectId, key, transitionIds, PageRequest.of(page, size)));
+    }
+
+    @GetMapping("/objects/{objectType}/{objectId}/last-log")
+    public ResponseEntity<WorkflowTransitionLogDTO> getLastLog(
+            @PathVariable String objectType,
+            @PathVariable String objectId
+    ) {
+        return ResponseEntity.ok(workflowTransitionLogService.getLastLog(objectType, objectId));
     }
 
     @GetMapping("/objects/{objectType}/{objectId}/general-info")

@@ -13,6 +13,7 @@ import lenicorp.admin.workflowengine.model.entities.Transition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,7 @@ public class WorkflowTransitionLogServiceImpl implements WorkflowTransitionLogSe
 
     @Override
     @Transactional
-    public void logTransition(String workflowCode, Long transitionId, String transitionPrivilegeCode, String objectType, String objectId, String fromStatus, String toStatus, String comment, Map<String, Object> context, List<AttachmentRef> attachments)
+    public WorkflowTransitionLog logTransition(String workflowCode, Long transitionId, String transitionPrivilegeCode, String objectType, String objectId, String fromStatus, String toStatus, String comment, Map<String, Object> context, List<AttachmentRef> attachments)
     {
         WorkflowTransitionLog log = new WorkflowTransitionLog();
         log.setWorkflowCode(workflowCode);
@@ -59,7 +60,7 @@ public class WorkflowTransitionLogServiceImpl implements WorkflowTransitionLogSe
             log.setAttachments(attEntities);
         }
 
-        logRepository.save(log);
+        return logRepository.save(log);
     }
 
     @Override
@@ -69,7 +70,15 @@ public class WorkflowTransitionLogServiceImpl implements WorkflowTransitionLogSe
         return page.map(this::toDto);
     }
 
-    private WorkflowTransitionLogDTO toDto(WorkflowTransitionLog log) {
+    @Override
+    public WorkflowTransitionLogDTO getLastLog(String objectType, String objectId)
+    {
+        WorkflowTransitionLog log = logRepository.findLastLog(objectType, objectId);
+        return log == null ? null : toDto(log);
+    }
+
+    private WorkflowTransitionLogDTO toDto(WorkflowTransitionLog log)
+    {
         WorkflowTransitionLogDTO dto = new WorkflowTransitionLogDTO();
         dto.setId(log.getId());
         dto.setWorkflowCode(log.getWorkflowCode());

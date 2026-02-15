@@ -108,7 +108,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
 
         // Log the transition
         Map<String, Object> ctx = request != null && request.getContext()!=null ? request.getContext() : Map.of();
-        logService.logTransition(
+        WorkflowTransitionLog transitionLog = logService.logTransition(
                 workflowCode,
                 transitionId,
                 transitionPrivilegeCode,

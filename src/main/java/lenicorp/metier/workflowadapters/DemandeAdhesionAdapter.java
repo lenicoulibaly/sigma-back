@@ -1,6 +1,8 @@
 package lenicorp.metier.workflowadapters;
 
 import lenicorp.admin.workflowengine.engine.adapter.ObjectAdapter;
+import lenicorp.admin.workflowengine.execution.model.WorkflowTransitionLog;
+import lenicorp.admin.workflowengine.execution.repo.WorkflowTransitionLogRepository;
 import lenicorp.admin.workflowengine.model.dtos.InfoFieldDTO;
 import lenicorp.metier.association.controller.repositories.DemandeAdhesionRepository;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
@@ -16,6 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DemandeAdhesionAdapter implements ObjectAdapter<DemandeAdhesion> {
     private final DemandeAdhesionRepository repository;
+    private final WorkflowTransitionLogRepository wtLogRepo;
 
     @Override
     public Class<DemandeAdhesion> targetType() {

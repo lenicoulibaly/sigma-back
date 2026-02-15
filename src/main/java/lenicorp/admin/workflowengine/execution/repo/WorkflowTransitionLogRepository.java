@@ -15,6 +15,13 @@ public interface WorkflowTransitionLogRepository extends JpaRepository<WorkflowT
             "ORDER BY l.createdAt DESC")
     List<WorkflowTransitionLog> findByObjectTypeAndObjectId(@Param("objectType") String objectType, @Param("objectId") String objectId);
 
+    @Query("""
+            SELECT l FROM WorkflowTransitionLog l
+            WHERE l.objectType = :objectType AND l.objectId = :objectId
+            AND l.createdAt = (select max(l2.createdAt) from WorkflowTransitionLog l2 where l2.objectType = :objectType and l2.objectId = :objectId)
+                """)
+    WorkflowTransitionLog findLastLog(@Param("objectType") String objectType, @Param("objectId") String objectId);
+
     @Query("SELECT l FROM WorkflowTransitionLog l " +
             "WHERE l.objectType = :objectType AND l.objectId = :objectId " +
             "AND (:key IS NULL OR UPPER(coalesce(l.comment, '')) LIKE UPPER(CONCAT('%', :key, '%'))) " +
