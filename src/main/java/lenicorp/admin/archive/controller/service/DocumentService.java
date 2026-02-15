@@ -3,6 +3,7 @@ package lenicorp.admin.archive.controller.service;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpHeaders;
@@ -62,6 +63,20 @@ public class DocumentService implements IDocumentService
 	}
 
 	@Override
+	public MultipartFile downloadMultipartFile(Long docI)
+	{
+		Document doc = docRepo.findById(docI).orElseThrow(() -> new AppException("Document introuvable"));
+		byte[] bytes = downloadFile(doc.getDocPath());
+		MultipartFile multipartFile = new MockMultipartFile(
+				"file",                     // nom du champ
+				doc.getDocName(),            // nom du fichier
+				doc.getDocMimeType(), // content-type (à adapter si besoin)
+				bytes                        // contenu
+		);
+		return multipartFile;
+	}
+
+	@Override
 	public ResponseEntity<?> downloadFile(Long docId) {
 		Document doc = docRepo.findById(docId).orElseThrow(() -> new AppException("Document introuvable"));
 		if(doc == null) return ResponseEntity.notFound().build();
@@ -104,7 +119,14 @@ public class DocumentService implements IDocumentService
 		return docs;
 	}
 
-    @Override
+	@Override
+	public List<ReadDocDTO> searchObjectDocs(Long objectI, String tableName, String key)
+	{
+		key = StringUtils.stripAccentsToUpperCase(key);
+		return docRepo.searchObjectDocs(objectI, tableName, key);
+	}
+
+	@Override
     public List<byte[]> getFileByObjectIdAndTableNameAndTypeCode(Long objectId, String tableName, String typeCode)
     {
         List<ReadDocDTO> logoDocs = docRepo.findByObjectIdAndTableNameAndTypeCode(objectId, tableName, typeCode);

@@ -31,7 +31,6 @@ public class DemandeAdhesionController
         return service.createUserAndDemandeAdhesion(dto);
     }
 
-    @PutMapping("/{id}")
     @PutMapping(value="/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DemandeAdhesionDTO update(@PathVariable("id") Long id, @Valid DemandeAdhesionDTO dto) {
         return service.update(id, dto);

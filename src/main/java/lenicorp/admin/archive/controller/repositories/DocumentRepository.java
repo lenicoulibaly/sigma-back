@@ -96,6 +96,20 @@ public interface DocumentRepository extends JpaRepository<Document, Long>
     select new lenicorp.admin.archive.model.dtos.response.ReadDocDTO(
         d.docId, d.docNum, d.docName, d.docDescription, d.docPath
             , d.docType.code, d.docType.name, d.docExtension, d.docMimeType) 
+        from Document d where d.objectTableName.code = coalesce(:tableName, d.objectTableName.code) 
+        and d.objectId = coalesce(:objectId, d.objectId) 
+        and (locate(upper(function('unaccent', :key)), upper(function('unaccent', d.docName))) > 0
+            or locate(upper(function('unaccent', :key)), upper(function('unaccent', d.docDescription))) > 0
+            or locate(upper(function('unaccent', :key)), upper(function('unaccent', d.docNum))) > 0)
+    """)
+    List<ReadDocDTO> searchObjectDocs(@Param("objectId") Long objectId,
+                                      @Param("tableName")String tableName,
+                                      @Param("key")String key);
+
+    @Query("""
+    select new lenicorp.admin.archive.model.dtos.response.ReadDocDTO(
+        d.docId, d.docNum, d.docName, d.docDescription, d.docPath
+            , d.docType.code, d.docType.name, d.docExtension, d.docMimeType) 
         from Document d where d.objectId = ?1 and d.objectTableName.code = ?2 and d.docType.code = ?3
     """)
     List<ReadDocDTO> findByObjectIdAndTableNameAndTypeCode(Long assoId, String tableName, String typeCode);

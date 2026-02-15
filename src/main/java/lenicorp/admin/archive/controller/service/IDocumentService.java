@@ -24,6 +24,8 @@ public interface IDocumentService
 {
 	void uploadFile(InputStream file, String destinationPath) throws RuntimeException;
 	byte[] downloadFile(String filePAth);
+
+	MultipartFile downloadMultipartFile(Long docI);
 	ResponseEntity<?> downloadFile(Long docI);
 
     @Transactional
@@ -41,6 +43,7 @@ public interface IDocumentService
     boolean deleteFile(String filePath);
 
 	Page<ReadDocDTO> searchObjectDocs(Long objectI, String tableName, String key, Pageable pageable);
+	List<ReadDocDTO> searchObjectDocs(Long objectI, String tableName, String key);
 
     List<byte[]> getFileByObjectIdAndTableNameAndTypeCode(Long objectId, String tableName, String typeCode);
 

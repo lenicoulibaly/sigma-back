@@ -1,5 +1,6 @@
 package lenicorp.admin.archive.model.dtos.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lenicorp.admin.archive.model.dtos.validator.ValidDocType;
 import lenicorp.admin.archive.model.dtos.validator.ValidFileExtension;
 import lenicorp.admin.archive.model.dtos.validator.ValidFileSize;
@@ -19,6 +20,9 @@ public class UploadDocReq
     private String docNum;
     private String docName;
     private String docDescription;
+    @JsonIgnore
     private MultipartFile file;
     private String objectTableName;
+    private Long docId; // Identifiant du document (pour lecture/maj)
+    private String docMimeType;
 }

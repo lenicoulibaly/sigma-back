@@ -82,7 +82,7 @@ public class AssociationService implements IAssociationService
 
         if(dto.getLogo() != null)
         {
-            UploadDocReq docReq = new UploadDocReq(assoId, "LOGO", null, "Logo", "Logo de l'association", dto.getLogo(), "ASSOCIATION");
+            UploadDocReq docReq = new UploadDocReq(assoId, "LOGO", null, "Logo", "Logo de l'association", dto.getLogo(), "ASSOCIATION", null, null);
             docService.uploadDocument(docReq);
         }
 

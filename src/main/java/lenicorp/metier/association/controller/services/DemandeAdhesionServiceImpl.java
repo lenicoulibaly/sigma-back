@@ -1,6 +1,7 @@
 package lenicorp.metier.association.controller.services;
 
 import lenicorp.admin.archive.controller.service.IDocumentService;
+import lenicorp.admin.archive.model.dtos.request.UpdateDocReq;
 import lenicorp.admin.archive.model.dtos.request.UploadDocReq;
 import lenicorp.admin.exceptions.AppException;
 import lenicorp.admin.security.controller.repositories.UserRepo;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -140,6 +142,37 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService
         mapper.updateEntity(dto, entity);
         
         entity = repository.save(entity);
+
+        // Mise à jour des documents
+        if (dto.getDocuments() != null && !dto.getDocuments().isEmpty()) {
+            for (UploadDocReq docReq : dto.getDocuments()) {
+                try {
+                    if (docReq.getDocId() == null)
+                    {
+                        // Nouveau document
+                        docReq.setObjectId(entity.getDemandeId());
+                        docReq.setObjectTableName("DEMANDE_ADHESION");
+                        documentService.uploadDocument(docReq);
+                    }
+                    else if (docReq.getFile() != null)
+                    {
+                        // Mise à jour du document existant
+                        UpdateDocReq updateDocReq = new UpdateDocReq(
+                                docReq.getDocId(),
+                                docReq.getDocTypeCode(),
+                                docReq.getDocNum(),
+                                docReq.getDocDescription(),
+                                docReq.getFile()
+                        );
+                        documentService.updateDocument(updateDocReq);
+                    }
+                    // Si docId est présent mais file est null, on ne fait rien (pas de modification)
+                } catch (java.io.IOException e) {
+                    throw new AppException("Erreur lors de la mise à jour des documents : " + e.getMessage());
+                }
+            }
+        }
+
         return mapper.toDto(entity);
     }
 
