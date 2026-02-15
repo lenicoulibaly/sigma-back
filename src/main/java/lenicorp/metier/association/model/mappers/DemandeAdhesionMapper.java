@@ -3,7 +3,6 @@ package lenicorp.metier.association.model.mappers;
 import lenicorp.admin.workflowengine.controller.repositories.WorkflowStatusRepository;
 import lenicorp.admin.workflowengine.model.entities.WorkflowStatus;
 import lenicorp.metier.association.model.dtos.CreateDemandeAdhesionDTO;
-import lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,20 +20,6 @@ public abstract class DemandeAdhesionMapper {
     @Mapping(target = "dateSoumission", expression = "java(java.time.LocalDateTime.now())")
     // statut & reference & dateDecision & adhesionCreee managed in service
     public abstract DemandeAdhesion mapTopDemandeAdhesion(CreateDemandeAdhesionDTO dto, @Context lenicorp.admin.security.controller.services.specs.IJwtService jwtService);
-
-    // Entity -> Record(Read)
-    @Mapping(target = "assoId", source = "association.assoId")
-    @Mapping(target = "sectionId", source = "section.sectionId")
-    @Mapping(target = "userId", source = "demandeur.userId")
-    @Mapping(target = "userFullName", expression = "java(combineUserName(entity.getDemandeur()))")
-    @Mapping(target = "statutCode", source = "statut.code")
-    @Mapping(target = "statutName", source = "statut.name")
-    @Mapping(target = "statutColor", expression = "java(getStatutColor(entity))")
-    @Mapping(target = "statutIcon", expression = "java(getStatutIcon(entity))")
-    @Mapping(target = "adhesionIdCreee", source = "adhesionCreee.adhesionId")
-    @Mapping(target = "createdAt", source = "createdAt")
-    @Mapping(target = "decideurFullName", expression = "java(null)")
-    public abstract ReadDemandeAdhesionDTO mapTopDemandeAdhesionReadDTO(DemandeAdhesion entity);
 
     @Mapping(target = "association", source = "assoId", qualifiedByName = "idToAssociation")
     @Mapping(target = "section", source = "sectionId", qualifiedByName = "idToSection")

@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lenicorp.admin.security.controller.services.specs.IJwtService;
 import lenicorp.metier.association.controller.services.DemandeAdhesionService;
 import lenicorp.metier.association.model.dtos.DemandeAdhesionDTO;
-import lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO;
 import lenicorp.metier.association.model.dtos.UserDemandeAdhesionDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,8 +32,14 @@ public class DemandeAdhesionController
     }
 
     @PutMapping("/{id}")
-    public DemandeAdhesionDTO update(@PathVariable("id") Long id, @RequestBody DemandeAdhesionDTO dto) {
+    @PutMapping(value="/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public DemandeAdhesionDTO update(@PathVariable("id") Long id, @Valid DemandeAdhesionDTO dto) {
         return service.update(id, dto);
+    }
+
+    @GetMapping("/{id}")
+    public DemandeAdhesionDTO findById(@PathVariable("id") Long id) {
+        return service.findById(id);
     }
 
     @GetMapping({"/search", "/{assoId}/search"})
@@ -50,7 +55,7 @@ public class DemandeAdhesionController
     }
 
     @GetMapping("/user-demandes")
-    public Page<ReadDemandeAdhesionDTO> searchForUser(
+    public Page<DemandeAdhesionDTO> searchForUser(
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "key", required = false) String key,
             @RequestParam(value = "assoIds", required = false) List<Long> assoIds,

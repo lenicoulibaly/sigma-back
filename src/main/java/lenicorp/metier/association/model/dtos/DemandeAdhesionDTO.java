@@ -24,14 +24,14 @@ public class DemandeAdhesionDTO {
     private LocalDateTime dateSoumission;
     private LocalDateTime dateDecision;
     private LocalDateTime createdAt;
-    private String motifRefus;
+    private String motifStatut;
     private Boolean accepteCharte;
     private Boolean accepteRgpd;
     private Boolean accepteStatutsReglements;
     private String message;
     private List<UploadDocReq> documents;
 
-    public DemandeAdhesionDTO(Long demandeId, Long assoId, String associationNom, Long sectionId, String sectionNom, Long demandeurId, String demandeurNom, String statutCode, String statutNom, String statutColor, String statutIcon, LocalDateTime dateSoumission, LocalDateTime dateDecision, LocalDateTime createdAt, String motifRefus, Boolean accepteCharte, Boolean accepteRgpd, Boolean accepteStatutsReglements, String message)
+    public DemandeAdhesionDTO(Long demandeId, Long assoId, String associationNom, Long sectionId, String sectionNom, Long demandeurId, String demandeurNom, String statutCode, String statutNom, String statutColor, String statutIcon, LocalDateTime dateSoumission, LocalDateTime dateDecision, LocalDateTime createdAt, String motifStatut, Boolean accepteCharte, Boolean accepteRgpd, Boolean accepteStatutsReglements, String message)
     {
         this.demandeId = demandeId;
         this.assoId = assoId;
@@ -47,7 +47,7 @@ public class DemandeAdhesionDTO {
         this.dateSoumission = dateSoumission;
         this.dateDecision = dateDecision;
         this.createdAt = createdAt;
-        this.motifRefus = motifRefus;
+        this.motifStatut = motifStatut;
         this.accepteCharte = accepteCharte;
         this.accepteRgpd = accepteRgpd;
         this.accepteStatutsReglements = accepteStatutsReglements;

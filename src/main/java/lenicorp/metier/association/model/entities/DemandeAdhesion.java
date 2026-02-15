@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity @Audited @Getter @Setter @NoArgsConstructor
@@ -35,7 +34,7 @@ public class DemandeAdhesion extends AuditableEntity
     private LocalDateTime dateSoumission;
     private LocalDateTime dateDecision;
     @Column(length = 2000)
-    private String motifRefus;
+    private String motifStatut;
     private Boolean accepteCharte;
     private Boolean accepteRgpd;
     private Boolean accepteStatutsReglements;

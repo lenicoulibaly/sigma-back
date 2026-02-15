@@ -13,7 +13,6 @@ import lenicorp.admin.workflowengine.engine.registry.WorkflowRegistry;
 import lenicorp.admin.workflowengine.execution.service.WorkflowTransitionLogService;
 import lenicorp.metier.association.controller.repositories.DemandeAdhesionRepository;
 import lenicorp.metier.association.model.dtos.DemandeAdhesionDTO;
-import lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO;
 import lenicorp.metier.association.model.dtos.UserDemandeAdhesionDTO;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
 import lenicorp.metier.association.model.mappers.DemandeAdhesionMapper;
@@ -162,7 +161,8 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService
     }
 
     @Override
-    public Page<ReadDemandeAdhesionDTO> searchForUser(Long userId, String key, List<Long> assoIds, List<String> workflowStatusGroupCodes, Pageable pageable) {
+    public Page<DemandeAdhesionDTO> searchForUser(Long userId, String key, List<Long> assoIds, List<String> workflowStatusGroupCodes, Pageable pageable)
+    {
         List<String> statusCodes = new ArrayList<>();
         boolean hasStatusFilter = false;
 
@@ -176,7 +176,29 @@ public class DemandeAdhesionServiceImpl implements DemandeAdhesionService
             }
         }
 
-        return repository.searchForUser(userId, key, assoIds, statusCodes, hasStatusFilter, pageable);
+        Page<DemandeAdhesionDTO> page = repository.searchForUser(userId, key, assoIds, statusCodes, hasStatusFilter, pageable);
+
+        return page;
+    }
+
+    @Override
+    public DemandeAdhesionDTO findById(Long id) {
+        DemandeAdhesionDTO dto = repository.findByIdCustom(id)
+                .orElseThrow(() -> new NoSuchElementException("Demande d'adhésion introuvable avec l'ID : " + id));
+        dto.setDocuments(documentService.searchObjectDocs(id, "DEMANDE_ADHESION", null, Pageable.unpaged())
+                .getContent().stream().map(doc -> {
+                    UploadDocReq req = new UploadDocReq();
+                    req.setObjectId(id);
+                    req.setDocName(doc.getDocName());
+                    req.setDocNum(doc.getDocNum());
+                    req.setDocDescription(doc.getDocDescription());
+                    req.setDocTypeCode(doc.getDocUniqueCode());
+                    req.setObjectTableName("DEMANDE_ADHESION");
+                    req.setDocId(doc.getDocId());
+                    req.setDocMimeType(doc.getDocMimeType());
+                    return req;
+                }).toList());
+        return dto;
     }
 
     private DemandeAdhesionDTO toDto(DemandeAdhesion d) {

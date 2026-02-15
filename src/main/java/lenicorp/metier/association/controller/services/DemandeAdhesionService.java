@@ -1,7 +1,6 @@
 package lenicorp.metier.association.controller.services;
 
 import lenicorp.metier.association.model.dtos.DemandeAdhesionDTO;
-import lenicorp.metier.association.model.dtos.ReadDemandeAdhesionDTO;
 import lenicorp.metier.association.model.dtos.UserDemandeAdhesionDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,5 +12,6 @@ public interface DemandeAdhesionService {
     DemandeAdhesionDTO createUserAndDemandeAdhesion(UserDemandeAdhesionDTO dto);
     DemandeAdhesionDTO update(Long id, DemandeAdhesionDTO dto);
     Page<DemandeAdhesionDTO> search(Long associationId, Long userId, String key, String workflowStatusGroupCode, Pageable pageable);
-    Page<ReadDemandeAdhesionDTO> searchForUser(Long userId, String key, List<Long> assoIds, List<String> workflowStatusGroupCodes, Pageable pageable);
+    Page<DemandeAdhesionDTO> searchForUser(Long userId, String key, List<Long> assoIds, List<String> workflowStatusGroupCodes, Pageable pageable);
+    DemandeAdhesionDTO findById(Long id);
 }

@@ -13,7 +13,7 @@ import lenicorp.metier.association.controller.repositories.AdhesionRepo;
 import lenicorp.metier.association.model.dtos.AdhesionDTO;
 import lenicorp.metier.association.model.entities.Adhesion;
 import lenicorp.metier.association.model.entities.Association;
-import lenicorp.metier.association.controller.repositories.DemandeAdhesionRepo;
+import lenicorp.metier.association.controller.repositories.DemandeAdhesionRepository;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
 import lenicorp.metier.association.model.entities.Section;
 import lenicorp.metier.association.model.mappers.AdhesionMapper;
@@ -35,7 +35,7 @@ public class AdhesionService implements IAdhesionService
     private final AdhesionRepo adhesionRepo;
     private final UserRepo userRepo;
     private final DocumentRepository docRepo;
-    private final DemandeAdhesionRepo demandeAdhesionRepo;
+    private final DemandeAdhesionRepository demandeAdhesionRepo;
     private final IUserService userService; // may still be used elsewhere in future methods
 
     @Override
