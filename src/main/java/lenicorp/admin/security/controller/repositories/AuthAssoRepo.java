@@ -118,63 +118,28 @@ public interface AuthAssoRepo extends JpaRepository<AuthAssociation, Long>
                 .collect(java.util.stream.Collectors.toList());
     }
 
-    // Native query to find privileges to add on role
-    @Query(value = """
-            SELECT DISTINCT vp.code, vp.name, vp.description, 
-            'PRV' as type_code, 'Privilège' as type_name, vp.privilege_type_code, vp.privilege_type_name  
-            FROM v_privilege vp 
-            WHERE 
-                vp.code IN (:privilegeCodes) 
-                AND vp.code NOT IN 
-                    (SELECT vrp.privilege_code FROM v_role_privilege vrp WHERE vrp.role_code = :roleCode)
-            """, nativeQuery = true)
-    List<Object[]> findPrivilegesToAddOnRoleRaw(@Param("roleCode") String roleCode, @Param("privilegeCodes") List<String> privilegeCodes);
-
     // Helper method to convert raw query results to AuthorityDTO objects
-    default List<AuthorityDTO> findPrivilesToAddOnRole(String roleCode, List<String> privilegeCodes) {
-        if (privilegeCodes == null || privilegeCodes.isEmpty()) return List.of();
-        return findPrivilegesToAddOnRoleRaw(roleCode, privilegeCodes).stream()
-                .map(row -> new AuthorityDTO(
-                    (String) row[0], // code
-                    (String) row[1], // name
-                    (String) row[2], // description
-                    (String) row[3], // type_code
-                    (String) row[4], // type_name
-                    (String) row[5], // privilege_type_code
-                    (String) row[6], // privilege_type_name
-                    "PRV" // authType
-                ))
-                .collect(java.util.stream.Collectors.toList());
-    }
+    @Query("""
+        select new lenicorp.admin.security.model.dtos.AuthorityDTO(
+            prv.code, prv.name, prv.description, prv.typeCode, 
+            prv.privilegeTypeName, prv.privilegeTypeCode, prv.privilegeTypeName, 'PRV') 
+        from VPrivilege prv 
+        where not exists (select rp from VRolePrivilege rp where rp.roleCode = :roleCode and rp.privilegeCode = prv.code)
+            AND prv.code IN (:privilegeCodes)
+    """)
+    List<AuthorityDTO> findPrivilesToAddOnRole(@Param("roleCode") String roleCode, @Param("privilegeCodes")List<String> privilegeCodes);
 
-    // Native query to find privileges to remove on role
-    @Query(value = """
-            SELECT DISTINCT vp.code, vp.name, vp.description, 
-            'PRV' as type_code, 'Privilège' as type_name, vp.privilege_type_code, vp.privilege_type_name
-            FROM v_privilege vp 
-            WHERE 
-                vp.code NOT IN (:privilegeCodes) 
-                AND vp.code IN (select vrp.privilege_code from v_role_privilege vrp where vrp.role_code = :roleCode)
-            """, nativeQuery = true)
-    List<Object[]> findPrivilegesToRemoveOnRoleRaw(@Param("roleCode") String roleCode, @Param("privilegeCodes") List<String> privilegeCodes);
-
-    // Helper method to convert raw query results to AuthorityDTO objects
-    default List<AuthorityDTO> findPrivilesToRemoveOnRole(String roleCode, List<String> privilegeCodes) {
-        if (privilegeCodes == null || privilegeCodes.isEmpty()) return List.of();
-        return findPrivilegesToRemoveOnRoleRaw(roleCode, privilegeCodes).stream()
-                .map(row -> new AuthorityDTO(
-                    (String) row[0], // code
-                    (String) row[1], // name
-                    (String) row[2], // description
-                    (String) row[3], // type_code
-                    (String) row[4], // type_name
-                    (String) row[5], // privilege_type_code
-                    (String) row[6], // privilege_type_name
-                    "PRV" // authType
-                ))
-                .collect(java.util.stream.Collectors.toList());
-    }
-
+    // JPQL query to find privileges to remove on role
+    @Query("""
+        select new lenicorp.admin.security.model.dtos.AuthorityDTO(
+            prv.code, prv.name, prv.description, prv.typeCode, 
+            prv.privilegeTypeName, prv.privilegeTypeCode, prv.privilegeTypeName, 'PRV') 
+        from VPrivilege prv 
+        where prv.code NOT IN (:privilegeCodes) 
+            AND exists (select rp from VRolePrivilege rp where rp.roleCode = :roleCode and rp.privilegeCode = prv.code)
+    """)
+    List<AuthorityDTO> findPrivilesToRemoveOnRole(@Param("roleCode") String roleCode, @Param("privilegeCodes") List<String> privilegeCodes);
+    
     // Native query to find roles to add on profile
     @Query(value = """
             SELECT DISTINCT rol.code as code, rol.name as name, rol.description as description, 
@@ -260,7 +225,7 @@ public interface AuthAssoRepo extends JpaRepository<AuthAssociation, Long>
 
     @Query("""
         select new lenicorp.admin.security.model.dtos.AuthorityDTO(vrp.privilegeCode, vrp.privilegeName, vrp.privilegeDescription, 'PRV', 'PRIVILEGE', vrp.privilegeTypeCode, vrp.privilegeTypeName)
-        from VRolePrivilege vrp where vrp.roleCode = :roleCode and vrp.privilegeTypeCode in :privilegeTypeCodes 
+        from VRolePrivilege vrp where vrp.roleCode = :roleCode and (:privilegeTypeCodes is null or vrp.privilegeTypeCode in :privilegeTypeCodes )
         and (
         locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vrp.privilegeCode, '') ) as string))) >0 or 
         locate(upper(coalesce(:key, '') ), upper(cast(function('unaccent',  coalesce(vrp.privilegeName, '') ) as string))) >0
