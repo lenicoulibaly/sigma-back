@@ -12,6 +12,7 @@ public interface ObjectAdapter<T> {
     String getCurrentStatus(T obj);
 
     void setStatus(T obj, String newStatus);
+    void setComment(T obj, String comment);
 
     Map<String, Object> toRuleMap(T obj);
 

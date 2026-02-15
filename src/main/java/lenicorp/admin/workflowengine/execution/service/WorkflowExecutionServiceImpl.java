@@ -100,6 +100,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         }
         // Apply transition
         adapter.setStatus(aggregate, to);
+        adapter.setComment(aggregate, request != null ? request.getComment() : null);
         adapter.save(aggregate);
 
         // Persist attachments via archive module

@@ -37,6 +37,12 @@ public class DemandeAdhesionAdapter implements ObjectAdapter<DemandeAdhesion> {
     }
 
     @Override
+    public void setComment(DemandeAdhesion obj, String comment)
+    {
+        obj.setMotifStatut(comment);
+    }
+
+    @Override
     public Map<String, Object> toRuleMap(DemandeAdhesion obj) {
         Map<String, Object> facts = new HashMap<>();
         facts.put("droitAdhesion", obj.getAssociation() != null ? obj.getAssociation().getDroitAdhesion() : null);
@@ -61,12 +67,14 @@ public class DemandeAdhesionAdapter implements ObjectAdapter<DemandeAdhesion> {
     }
 
     @Override
-    public void save(DemandeAdhesion obj) {
+    public void save(DemandeAdhesion obj)
+    {
         repository.save(obj);
     }
 
     @Override
-    public String getId(DemandeAdhesion obj) {
+    public String getId(DemandeAdhesion obj)
+    {
         return obj.getDemandeId() != null ? obj.getDemandeId().toString() : null;
     }
 

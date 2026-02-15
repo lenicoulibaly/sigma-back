@@ -37,6 +37,12 @@ public class AdhesionAdapter implements ObjectAdapter<Adhesion> {
     }
 
     @Override
+    public void setComment(Adhesion obj, String comment)
+    {
+        //obj.setMotifStatut(comment);
+    }
+
+    @Override
     public Map<String, Object> toRuleMap(Adhesion obj) {
         Map<String, Object> facts = new HashMap<>();
         facts.put("active", obj.isActive());
