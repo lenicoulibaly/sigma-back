@@ -17,11 +17,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -83,6 +86,32 @@ public class MailService implements MailServiceInterface
         String corpsHtml = chargerTemplateHtml("templates/emails/demande-adhesion-approuvee.html")
                 .replace("${nomDestinataire}", nomDestinataire)
                 .replace("${nomAssociation}", nomAssociation)
+                .replace("${lienConnexion}", lienConnexion);
+
+        MailRequest mailRequest = MailRequest.builder()
+                .to(destinataire)
+                .subject(sujet)
+                .content(corpsHtml)
+                .isHtml(true)
+                .build();
+
+        return sendMailAsync(mailRequest);
+    }
+
+    @Override
+    public CompletableFuture<MailResponse> envoyerEmailAdhesionAccepteePaiement(String destinataire, String nomDestinataire, String nomAssociation, double montantDroitAdhesion, String lienConnexion)
+    {
+        String sujet = "Demande d'adhésion acceptée - Paiement du droit d'adhésion requis";
+
+        // Formatter le montant avec séparateur de milliers
+        NumberFormat nf = NumberFormat.getInstance(Locale.FRENCH);
+        String montantFormate = nf.format(montantDroitAdhesion);
+
+        // Charger le fichier HTML de notification d'adhésion acceptée avec paiement
+        String corpsHtml = chargerTemplateHtml("templates/emails/demande-adhesion-acceptee-paiement.html")
+                .replace("${nomDestinataire}", nomDestinataire)
+                .replace("${nomAssociation}", nomAssociation)
+                .replace("${montantDroitAdhesion}", montantFormate)
                 .replace("${lienConnexion}", lienConnexion);
 
         MailRequest mailRequest = MailRequest.builder()
@@ -224,17 +253,27 @@ public class MailService implements MailServiceInterface
         return message;
     }
 
-    private String chargerTemplateHtml(String cheminTemplate)
+    public static String chargerTemplate(String cheminTemplate)
     {
-        try
+        try (InputStream is = MailService.class.getClassLoader().getResourceAsStream(cheminTemplate))
         {
-            Path chemin = Paths.get(getClass().getClassLoader().getResource(cheminTemplate).toURI());
-            return Files.readString(chemin);
-        } catch (IOException | NullPointerException | URISyntaxException e)
+            if (is == null) throw new IOException("Template not found: " + cheminTemplate);
+            java.io.ByteArrayOutputStream result = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = is.read(buffer)) != -1) {
+                result.write(buffer, 0, length);
+            }
+            return result.toString(java.nio.charset.StandardCharsets.UTF_8.name());
+        } catch (IOException | NullPointerException e)
         {
-            log.error("Erreur lors du chargement du template HTML : {}", cheminTemplate, e);
             throw new RuntimeException("Impossible de charger le template : " + cheminTemplate, e);
         }
+    }
+
+    private String chargerTemplateHtml(String cheminTemplate)
+    {
+        return chargerTemplate(cheminTemplate);
     }
 
 }

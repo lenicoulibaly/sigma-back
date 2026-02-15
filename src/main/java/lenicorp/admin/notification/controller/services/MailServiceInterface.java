@@ -70,6 +70,18 @@ public interface MailServiceInterface
     CompletableFuture<MailResponse> envoyerEmailMembreActif(String destinataire, String nomDestinataire, String nomAssociation, String lienConnexion);
 
     /**
+     * Envoie un email pour informer un membre que sa demande d'adhésion est acceptée et qu'il doit payer.
+     *
+     * @param destinataire    L'adresse email du destinataire.
+     * @param nomDestinataire Le nom du destinataire.
+     * @param nomAssociation  Le nom de l'association.
+     * @param montantDroitAdhesion Le montant du droit d'adhésion.
+     * @param lienConnexion   Le lien vers l'espace membre pour le paiement.
+     * @return Un CompletableFuture de MailResponse décrivant le résultat de l'envoi.
+     */
+    CompletableFuture<MailResponse> envoyerEmailAdhesionAccepteePaiement(String destinataire, String nomDestinataire, String nomAssociation, double montantDroitAdhesion, String lienConnexion);
+
+    /**
      * Envoie un email avec le contenu spécifié.
      *
      * @param mailRequest Les informations sur l'email à envoyer.
