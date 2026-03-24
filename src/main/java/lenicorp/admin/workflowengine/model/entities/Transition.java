@@ -37,6 +37,9 @@ public class Transition extends AuditableEntity {
     @ManyToOne @JoinColumn(name = "default_sta_dest_code")
     private Type defaultStatutDestination;
 
+    @ManyToOne @JoinColumn(name = "transition_exec_comp_code")
+    private Type transitionExecComponent;
+
     @ManyToOne @JoinColumn(name = "workflow_id")
     @ToString.Exclude
     private Workflow workflow;

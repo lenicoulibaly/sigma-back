@@ -17,6 +17,7 @@ public interface TransitionRepository extends JpaRepository<Transition, Long> {
             t.transitionId, p.code, t.libelle, t.color, t.icon, t.ordre, 
             so.code, so.name, 
             sd.code, sd.name, 
+            te.code, te.name,
             t.workflow.id, t.active, t.visible,
             COALESCE(vc.commentRequired, false)
         )
@@ -24,6 +25,7 @@ public interface TransitionRepository extends JpaRepository<Transition, Long> {
         LEFT JOIN t.privilege p
         LEFT JOIN t.statutOrigine so
         LEFT JOIN t.defaultStatutDestination sd
+        LEFT JOIN t.transitionExecComponent te
         LEFT JOIN t.validationConfig vc
         WHERE t.workflow.id = :workflowId
           AND t.active = true
@@ -49,6 +51,7 @@ public interface TransitionRepository extends JpaRepository<Transition, Long> {
             t.transitionId, p.code, t.libelle, t.color, t.icon, t.ordre, 
             so.code, so.name, 
             sd.code, sd.name, 
+            te.code, te.name,
             t.workflow.id, t.active, t.visible,
             COALESCE(vc.commentRequired, false)
         )
@@ -56,6 +59,7 @@ public interface TransitionRepository extends JpaRepository<Transition, Long> {
         LEFT JOIN t.privilege p
         LEFT JOIN t.statutOrigine so
         LEFT JOIN t.defaultStatutDestination sd
+        LEFT JOIN t.transitionExecComponent te
         LEFT JOIN t.validationConfig vc
         WHERE t.workflow.code = :workflowCode 
           AND t.statutOrigine.code = :statusCode 
