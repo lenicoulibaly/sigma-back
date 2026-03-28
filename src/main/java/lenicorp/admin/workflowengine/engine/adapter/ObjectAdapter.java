@@ -1,6 +1,7 @@
 package lenicorp.admin.workflowengine.engine.adapter;
 
 import lenicorp.admin.workflowengine.model.dtos.InfoFieldDTO;
+import lenicorp.admin.workflowengine.model.dtos.GeneralInfoOptions;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,5 +27,10 @@ public interface ObjectAdapter<T> {
 
     default List<InfoFieldDTO> getGeneralInfo(T obj) {
         return Collections.emptyList();
+    }
+
+    // Nouvelle surcharge contextuelle: par défaut délègue à l'ancienne signature
+    default List<InfoFieldDTO> getGeneralInfo(T obj, GeneralInfoOptions options) {
+        return getGeneralInfo(obj);
     }
 }

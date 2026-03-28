@@ -50,7 +50,7 @@ public class Payment extends AuditableEntity {
     @ManyToOne 
     @JoinColumn(name = "OBJECT_TYPE_CODE") 
     @NotAudited
-    private Type objectType;
+    private Type paymentType;
 
     // L'ID de l'objet auquel appartient le paiement
     @Column(name = "object_id")

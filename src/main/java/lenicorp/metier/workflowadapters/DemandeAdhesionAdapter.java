@@ -4,8 +4,11 @@ import lenicorp.admin.workflowengine.engine.adapter.ObjectAdapter;
 import lenicorp.admin.workflowengine.execution.model.WorkflowTransitionLog;
 import lenicorp.admin.workflowengine.execution.repo.WorkflowTransitionLogRepository;
 import lenicorp.admin.workflowengine.model.dtos.InfoFieldDTO;
+import lenicorp.admin.workflowengine.model.dtos.GeneralInfoOptions;
 import lenicorp.metier.association.controller.repositories.DemandeAdhesionRepository;
 import lenicorp.metier.association.model.entities.DemandeAdhesion;
+import lenicorp.metier.payment.controller.services.IPaymentService;
+import lenicorp.metier.payment.model.dtos.PaymentBalanceDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +22,7 @@ import java.util.Map;
 public class DemandeAdhesionAdapter implements ObjectAdapter<DemandeAdhesion> {
     private final DemandeAdhesionRepository repository;
     private final WorkflowTransitionLogRepository wtLogRepo;
+    private final IPaymentService paymentService;
 
     @Override
     public Class<DemandeAdhesion> targetType() {
@@ -98,6 +102,33 @@ public class DemandeAdhesionAdapter implements ObjectAdapter<DemandeAdhesion> {
         if (obj.getStatut() != null) {
             fields.add(new InfoFieldDTO("Statut Actuel", obj.getStatut().name, null));
         }
+        return fields;
+    }
+
+    @Override
+    public List<InfoFieldDTO> getGeneralInfo(DemandeAdhesion obj, GeneralInfoOptions options) {
+        List<InfoFieldDTO> fields = new ArrayList<>(getGeneralInfo(obj));
+        if (obj == null || obj.getDemandeId() == null) return fields;
+        if (options == null || !options.isIncludePaymentInfo() || options.getPaymentTypeCode() == null) return fields;
+
+        PaymentBalanceDTO bal;
+        if (options.getChargeId() != null) {
+            bal = paymentService.getPaymentBalanceByCharge(options.getChargeId());
+        } else {
+            Long carrierId = options.getChargeCarrierId() != null ? options.getChargeCarrierId() : obj.getDemandeId();
+            boolean hasTargetTriplet = options.getPaymentTargetTypeCode() != null && options.getPaymentTargetId() != null && options.getPeriodKey() != null;
+            if (hasTargetTriplet) {
+                bal = paymentService.getPaymentBalance(options.getPaymentTypeCode(), carrierId,
+                        options.getPaymentTargetTypeCode(), options.getPaymentTargetId(), options.getPeriodKey());
+            } else {
+                bal = paymentService.getPaymentBalanceByCarrier(options.getPaymentTypeCode(), carrierId);
+            }
+        }
+
+        fields.add(new InfoFieldDTO("Montant dû", bal.getAmountDue(), null));
+        fields.add(new InfoFieldDTO("Montant payé", bal.getAmountPaid(), null));
+        fields.add(new InfoFieldDTO("Reste à payer", bal.getRemainingAmount(), null));
+        fields.add(new InfoFieldDTO("Soldé", bal.isSettled() ? "Oui" : "Non", null));
         return fields;
     }
 }

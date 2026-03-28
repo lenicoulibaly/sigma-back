@@ -9,17 +9,17 @@ import org.mapstruct.*;
 public interface PaymentMapper {
 
     @Mapping(target = "paymentMode", source = "paymentModeCode", qualifiedByName = "mapToType")
-    @Mapping(target = "objectType", source = "objectTypeCode", qualifiedByName = "mapToType")
+    @Mapping(target = "paymentType", source = "paymentTypeCode", qualifiedByName = "mapToType")
     Payment mapToEntity(PaymentDTO dto);
 
     @Mapping(target = "paymentModeCode", source = "paymentMode.code")
     @Mapping(target = "paymentModeName", source = "paymentMode.name")
-    @Mapping(target = "objectTypeCode", source = "objectType.code")
-    @Mapping(target = "objectTypeName", source = "objectType.name")
+    @Mapping(target = "paymentTypeCode", source = "paymentType.code")
+    @Mapping(target = "paymentTypeName", source = "paymentType.name")
     PaymentDTO mapToDto(Payment entity);
 
     @Mapping(target = "paymentMode", source = "paymentModeCode", qualifiedByName = "mapToType")
-    @Mapping(target = "objectType", source = "objectTypeCode", qualifiedByName = "mapToType")
+    @Mapping(target = "paymentType", source = "paymentTypeCode", qualifiedByName = "mapToType")
     @Mapping(target = "paymentId", ignore = true)
     void updateEntity(PaymentDTO dto, @MappingTarget Payment entity);
 

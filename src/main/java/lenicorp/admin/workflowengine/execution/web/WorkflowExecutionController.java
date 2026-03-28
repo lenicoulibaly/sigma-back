@@ -7,6 +7,7 @@ import lenicorp.admin.workflowengine.execution.service.WorkflowTransitionLogServ
 import lenicorp.admin.workflowengine.model.dtos.ExecuteTransitionRequestDTO;
 import lenicorp.admin.workflowengine.model.dtos.ExecuteTransitionResponseDTO;
 import lenicorp.admin.workflowengine.model.dtos.InfoFieldDTO;
+import lenicorp.admin.workflowengine.model.dtos.GeneralInfoOptions;
 import lenicorp.admin.workflowengine.model.dtos.TransitionDTO;
 import lenicorp.admin.workflowengine.execution.service.WorkflowExecutionService;
 import lombok.RequiredArgsConstructor;
@@ -95,13 +96,30 @@ public class WorkflowExecutionController {
     @GetMapping("/objects/{objectType}/{objectId}/general-info")
     public ResponseEntity<List<InfoFieldDTO>> getGeneralInfo(
             @PathVariable String objectType,
-            @PathVariable String objectId
+            @PathVariable String objectId,
+            @RequestParam(value = "includePaymentInfo", required = false, defaultValue = "false") boolean includePaymentInfo,
+            @RequestParam(value = "paymentTypeCode", required = false) String paymentTypeCode,
+            @RequestParam(value = "chargeId", required = false) Long chargeId,
+            @RequestParam(value = "chargeCarrierId", required = false) Long chargeCarrierId,
+            @RequestParam(value = "paymentTargetTypeCode", required = false) String paymentTargetTypeCode,
+            @RequestParam(value = "paymentTargetId", required = false) Long paymentTargetId,
+            @RequestParam(value = "periodKey", required = false) String periodKey
     ) {
         ObjectAdapter adapter = adapterRegistry.adapterFor(objectType);
         Object aggregate = adapter.load(objectId);
 
         if (aggregate == null) return ResponseEntity.notFound().build();
 
-        return ResponseEntity.ok(adapter.getGeneralInfo(aggregate));
+        GeneralInfoOptions options = GeneralInfoOptions.builder()
+                .includePaymentInfo(includePaymentInfo)
+                .paymentTypeCode(paymentTypeCode)
+                .chargeId(chargeId)
+                .chargeCarrierId(chargeCarrierId)
+                .paymentTargetTypeCode(paymentTargetTypeCode)
+                .paymentTargetId(paymentTargetId)
+                .periodKey(periodKey)
+                .build();
+
+        return ResponseEntity.ok(adapter.getGeneralInfo(aggregate, options));
     }
 }
